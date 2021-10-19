@@ -1,5 +1,5 @@
-from app.crud.base import CRUDBase
-from app.schemas import Category, CategoryCreate, CategoryUpdate
+from crud.base import CRUDBase
+from schemas import Category, CategoryCreate, CategoryUpdate
 
 
 class CRUDCategory(CRUDBase[Category, CategoryCreate, CategoryUpdate]):

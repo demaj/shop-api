@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.routers import categories, products
+from routers import categories, products
 
 app = FastAPI(
     title="Handicraft Shop API",
