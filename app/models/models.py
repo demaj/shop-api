@@ -1,6 +1,6 @@
 from sqlalchemy import Column, String, Integer, Boolean, ForeignKey, DateTime, func
 from sqlalchemy.orm import relationship
-from app.core.database import Base
+from core.database import Base
 
 
 class Category(Base):
@@ -25,4 +25,3 @@ class Product(Base):
     updated = Column(DateTime(timezone=True), onupdate=func.now())
 
     category = relationship("Category", back_populates="products")
-    

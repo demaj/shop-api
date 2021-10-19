@@ -3,16 +3,16 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 import crud
 import schemas
-from core import dependencies
+from core import deps
 
 router = APIRouter(prefix="/products")
 
 
 @router.get("/", response_model=List[schemas.Product])
 def read_products(
-        db: Session = Depends(dependencies.get_db),
-        skip: int = 0,
-        limit: int = 100,
+    db: Session = Depends(deps.get_db),
+    skip: int = 0,
+    limit: int = 100,
 ) -> Any:
     """ Retrieve products. """
     products = crud.product.get_list(db=db, skip=skip, limit=limit)
@@ -22,7 +22,7 @@ def read_products(
 @router.post("/", response_model=schemas.Product)
 def create_product(
         *,
-        db: Session = Depends(dependencies.get_db),
+        db: Session = Depends(deps.get_db),
         product_in: schemas.ProductCreate,
 ) -> Any:
     """ Create new product. """
@@ -33,7 +33,7 @@ def create_product(
 @router.put("/{id}", response_model=schemas.Product)
 def update_product(
         *,
-        db: Session = Depends(dependencies.get_db),
+        db: Session = Depends(deps.get_db),
         id: int,
         product_in: schemas.ProductUpdate,
 ) -> Any:
@@ -48,7 +48,7 @@ def update_product(
 @router.get("/{id}", response_model=schemas.Product)
 def read_product(
         *,
-        db: Session = Depends(dependencies.get_db),
+        db: Session = Depends(deps.get_db),
         id: int,
 ) -> Any:
     """ Get product by ID. """
@@ -61,7 +61,7 @@ def read_product(
 @router.delete("/{id}", response_model=schemas.Product)
 def delete_product(
         *,
-        db: Session = Depends(dependencies.get_db),
+        db: Session = Depends(deps.get_db),
         id: int,
 ) -> Any:
     """ Delete a product. """
