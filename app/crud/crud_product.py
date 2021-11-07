@@ -1,8 +1,8 @@
 from crud.base import CRUDBase
-from schemas import Product, ProductCreate, ProductUpdate
+from schemas import Product, ProductCreate, ProductBase
 
 
-class CRUDProduct(CRUDBase[Product, ProductCreate, ProductUpdate]):
+class CRUDProduct(CRUDBase[Product, ProductCreate, ProductBase]):
     pass
 
 

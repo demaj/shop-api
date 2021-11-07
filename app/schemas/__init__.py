@@ -1,2 +1,2 @@
-from .category import Category, CategoryCreate, CategoryUpdate, CategoryInDB
-from .product import Product, ProductCreate, ProductUpdate, ProductInDB
+from .category import Category, CategoryBase, CategoryCreate
+from .product import Product, ProductBase, ProductCreate

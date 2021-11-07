@@ -1,8 +1,8 @@
 from crud.base import CRUDBase
-from schemas import Category, CategoryCreate, CategoryUpdate
+from schemas import Category, CategoryCreate, CategoryBase
 
 
-class CRUDCategory(CRUDBase[Category, CategoryCreate, CategoryUpdate]):
+class CRUDCategory(CRUDBase[Category, CategoryCreate, CategoryBase]):
     pass
 
 

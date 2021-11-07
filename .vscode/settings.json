@@ -1,12 +1,15 @@
 {
-    "python.pythonPath": ".venv/bin/python",
+    "python.defaultInterpreterPath": ".venv/Scripts/python",
     "python.linting.enabled": true,
-    "python.linting.pylintEnabled": true,
+    "python.linting.pylintEnabled": false,
     "python.linting.flake8Enabled": true,
-    "python.testing.pytestArgs": ["tests"],
+    "python.linting.flake8Path": ".venv/Scripts/flake8",
+    "python.linting.flake8Args": ["--ignore=F401,E24,W504", "--verbose"],
     "python.testing.unittestEnabled": false,
     "python.testing.pytestEnabled": true,
+    "python.testing.pytestArgs": ["tests"],
     "python.analysis.extraPaths": ["app"],
+    "python.autoComplete.extraPaths": ["app"],
     "files.exclude": {
         "**/.git": true,
         "**/.svn": true,

@@ -1,6 +1,7 @@
-from sqlalchemy import Column, String, Integer, Boolean, ForeignKey, DateTime, func
-from sqlalchemy.orm import relationship
 from core.database import Base
+from sqlalchemy import (Boolean, Column, DateTime, ForeignKey, Integer, String,
+                        func)
+from sqlalchemy.orm import relationship
 
 
 class Category(Base):

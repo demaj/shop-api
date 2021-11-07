@@ -1,9 +1,10 @@
-from typing import List, Any
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
+from typing import Any, List
+
 import crud
 import schemas
 from core import deps
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
 
 router = APIRouter(prefix="/products")
 
@@ -35,7 +36,7 @@ def update_product(
         *,
         db: Session = Depends(deps.get_db),
         id: int,
-        product_in: schemas.ProductUpdate,
+        product_in: schemas.ProductBase,
 ) -> Any:
     """ Update a product. """
     product = crud.product.get(db=db, id=id)

@@ -1,18 +1,24 @@
-from typing import List, Any
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
+from typing import Any
+
 import crud
 import schemas
-from core import dependencies
+from core import deps
+from fastapi import APIRouter, Depends, HTTPException
+from responses import CategoryListResponse
+from sqlalchemy.orm import Session
 
 router = APIRouter(prefix="/categories")
 
 
-@router.get("/", response_model=List[schemas.Category])
+@router.get(
+    "/",
+    response_model=CategoryListResponse,
+    response_model_exclude_none=True
+)
 def read_categories(
-        db: Session = Depends(dependencies.get_db),
-        skip: int = 0,
-        limit: int = 100,
+    db: Session = Depends(deps.get_db),
+    skip: int = 0,
+    limit: int = 100,
 ) -> Any:
     """ Retrieve categories. """
     categories = crud.category.get_list(db, skip=skip, limit=limit)
@@ -21,9 +27,9 @@ def read_categories(
 
 @router.post("/", response_model=schemas.Category)
 def create_category(
-        *,
-        db: Session = Depends(dependencies.get_db),
-        category_in: schemas.CategoryCreate,
+    *,
+    db: Session = Depends(deps.get_db),
+    category_in: schemas.CategoryCreate,
 ) -> Any:
     """ Create new category. """
     category = crud.category.create(db=db, obj_in=category_in)
@@ -32,10 +38,10 @@ def create_category(
 
 @router.put("/{id}", response_model=schemas.Category)
 def update_category(
-        *,
-        db: Session = Depends(dependencies.get_db),
-        id: int,
-        category_in: schemas.CategoryUpdate,
+    *,
+    db: Session = Depends(deps.get_db),
+    id: int,
+    category_in: schemas.CategoryBase,
 ) -> Any:
     """ Update a category. """
     category = crud.category.get(db=db, id=id)
@@ -47,9 +53,9 @@ def update_category(
 
 @router.get("/{id}", response_model=schemas.Category)
 def read_category(
-        *,
-        db: Session = Depends(dependencies.get_db),
-        id: int,
+    *,
+    db: Session = Depends(deps.get_db),
+    id: int,
 ) -> Any:
     """ Get category by ID. """
     category = crud.category.get(db=db, id=id)
@@ -60,9 +66,9 @@ def read_category(
 
 @router.delete("/{id}", response_model=schemas.Category)
 def delete_category(
-        *,
-        db: Session = Depends(dependencies.get_db),
-        id: int,
+    *,
+    db: Session = Depends(deps.get_db),
+    id: int,
 ) -> Any:
     """ Delete a category. """
     category = crud.category.get(db=db, id=id)

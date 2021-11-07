@@ -14,5 +14,11 @@ venv/
 # Local PostgreSQL data
 data/
 
+# pytest
+.pytest_cache/
+
 # Others
 .idea
+.vscode
+
+
