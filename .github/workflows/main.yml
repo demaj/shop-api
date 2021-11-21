@@ -1,0 +1,44 @@
+name: Run Tests
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    name: Setup default version
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        # Run in all these versions of Python
+        python-version: [3.5, 3.6, 3.7, 3.8, 3.9]
+    
+    steps:
+    # Checkout the latest code from the repo
+    - name: Checkout repo
+      uses: actions/checkout@v2
+    
+    # Setup which version of Python to use
+    - name: Install Python3
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+    
+    # Display the Python version being used
+    - name: Display Python version
+      run: python -c "import sys; print(sys.version)"
+    
+    # Install dependecies
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    
+    # Run the tests.
+    - name: Run tests with pytest
+      run: pytest

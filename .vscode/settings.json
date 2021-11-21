@@ -1,9 +1,9 @@
 {
-    "python.defaultInterpreterPath": ".venv/Scripts/python",
+    "python.defaultInterpreterPath": ".venv/bin/python",
     "python.linting.enabled": true,
     "python.linting.pylintEnabled": false,
     "python.linting.flake8Enabled": true,
-    "python.linting.flake8Path": ".venv/Scripts/flake8",
+    "python.linting.flake8Path": ".venv/bin/flake8",
     "python.linting.flake8Args": ["--ignore=F401,E24,W504", "--verbose"],
     "python.testing.unittestEnabled": false,
     "python.testing.pytestEnabled": true,
