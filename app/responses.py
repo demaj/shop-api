@@ -6,7 +6,7 @@ from schemas import Category, Product
 
 class ListResponse(BaseModel):
     filters: Optional[Dict]
-    paging: Optional[Dict]
+    pagination: Optional[Dict]
 
 
 class CategoryListResponse(ListResponse):

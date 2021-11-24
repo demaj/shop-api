@@ -1,11 +1,10 @@
-from typing import Any
+from typing import Dict
 
-import crud
 import schemas
-from core import deps
 from fastapi import APIRouter, Depends, HTTPException
+from filters import CategoryFilter
+from pagination import CategoryPagination
 from responses import CategoryListResponse
-from sqlalchemy.orm import Session
 
 router = APIRouter(prefix="/categories")
 
@@ -15,64 +14,54 @@ router = APIRouter(prefix="/categories")
     response_model=CategoryListResponse,
     response_model_exclude_none=True
 )
-def read_categories(
-    db: Session = Depends(deps.get_db),
-    skip: int = 0,
-    limit: int = 100,
-) -> Any:
+async def read_categories(
+    filters: CategoryFilter = Depends(),
+    pagination: CategoryPagination = Depends()
+) -> Dict:
     """ Retrieve categories. """
-    categories = crud.category.get_list(db, skip=skip, limit=limit)
-    return categories
+    return {}
 
 
-@router.post("/", response_model=schemas.Category)
-def create_category(
-    *,
-    db: Session = Depends(deps.get_db),
-    category_in: schemas.CategoryCreate,
-) -> Any:
+@router.post(
+    "/",
+    response_model=schemas.Category
+)
+async def create_category(
+    category_in: schemas.CategoryCreate
+) -> Dict:
     """ Create new category. """
-    category = crud.category.create(db=db, obj_in=category_in)
-    return category
+    return {}
 
 
-@router.put("/{id}", response_model=schemas.Category)
-def update_category(
-    *,
-    db: Session = Depends(deps.get_db),
+@router.put(
+    "/{id}",
+    response_model=schemas.Category
+)
+async def update_category(
     id: int,
-    category_in: schemas.CategoryBase,
-) -> Any:
+    category_in: schemas.CategoryBase
+) -> Dict:
     """ Update a category. """
-    category = crud.category.get(db=db, id=id)
-    if not category:
-        raise HTTPException(status_code=404, detail="Category not found")
-    category = crud.category.update(db=db, db_obj=category, obj_in=category_in)
-    return category
+    return {}
 
 
-@router.get("/{id}", response_model=schemas.Category)
-def read_category(
-    *,
-    db: Session = Depends(deps.get_db),
-    id: int,
-) -> Any:
+@router.get(
+    "/{id}",
+    response_model=schemas.Category
+)
+async def read_category(
+    id: int
+) -> Dict:
     """ Get category by ID. """
-    category = crud.category.get(db=db, id=id)
-    if not category:
-        raise HTTPException(status_code=404, detail="Category not found")
-    return category
+    return {}
 
 
-@router.delete("/{id}", response_model=schemas.Category)
-def delete_category(
-    *,
-    db: Session = Depends(deps.get_db),
-    id: int,
-) -> Any:
+@router.delete(
+    "/{id}",
+    response_model=schemas.Category
+)
+async def delete_category(
+    id: int
+) -> Dict:
     """ Delete a category. """
-    category = crud.category.get(db=db, id=id)
-    if not category:
-        raise HTTPException(status_code=404, detail="Category not found")
-    category = crud.category.remove(db=db, id=id)
-    return category
+    return {}

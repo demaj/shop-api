@@ -1,7 +1,17 @@
 # Handicraft Shop API
 
-### Getting started
-From the `app/` execute:
+## Getting started
+
+### Requirements:
+- docker
+- docker-compose
+
+### Startup:
+```commandline
+docker-compose up -d --build
 ```
-uvicorn main:app --reload
+
+### Run tests:
+```shell
+./tests-run.sh
 ```

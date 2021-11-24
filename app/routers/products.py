@@ -1,73 +1,66 @@
-from typing import Any, List
+from typing import Dict
 
-import crud
 import schemas
-from core import deps
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
+from filters import ProductFilter
+from pagination import CategoryPagination
+from responses import ProductListResponse
 
 router = APIRouter(prefix="/products")
 
 
-@router.get("/", response_model=List[schemas.Product])
-def read_products(
-    db: Session = Depends(deps.get_db),
-    skip: int = 0,
-    limit: int = 100,
-) -> Any:
+@router.get(
+    "/",
+    response_model=ProductListResponse
+)
+async def read_products(
+    filters: ProductFilter = Depends(),
+    pagination: CategoryPagination = Depends()
+) -> Dict:
     """ Retrieve products. """
-    products = crud.product.get_list(db=db, skip=skip, limit=limit)
-    return products
+    return {}
 
 
-@router.post("/", response_model=schemas.Product)
-def create_product(
-        *,
-        db: Session = Depends(deps.get_db),
-        product_in: schemas.ProductCreate,
-) -> Any:
+@router.post(
+    "/",
+    response_model=schemas.Product
+)
+async def create_product(
+    product_in: schemas.ProductCreate
+) -> Dict:
     """ Create new product. """
-    product = crud.product.create(db=db, obj_in=product_in)
-    return product
+    return {}
 
 
-@router.put("/{id}", response_model=schemas.Product)
-def update_product(
-        *,
-        db: Session = Depends(deps.get_db),
-        id: int,
-        product_in: schemas.ProductBase,
-) -> Any:
+@router.put(
+    "/{id}",
+    response_model=schemas.Product
+)
+async def update_product(
+    id: int,
+    product_in: schemas.ProductBase
+) -> Dict:
     """ Update a product. """
-    product = crud.product.get(db=db, id=id)
-    if not product:
-        raise HTTPException(status_code=404, detail="Product not found")
-    product = crud.product.update(db=db, db_obj=product, obj_in=product_in)
-    return product
+    return {}
 
 
-@router.get("/{id}", response_model=schemas.Product)
-def read_product(
-        *,
-        db: Session = Depends(deps.get_db),
-        id: int,
-) -> Any:
+@router.get(
+    "/{id}",
+    response_model=schemas.Product
+)
+async def read_product(
+    id: int
+) -> Dict:
     """ Get product by ID. """
-    product = crud.product.get(db=db, id=id)
-    if not product:
-        raise HTTPException(status_code=404, detail="Product not found")
-    return product
+    return {}
 
 
-@router.delete("/{id}", response_model=schemas.Product)
-def delete_product(
-        *,
-        db: Session = Depends(deps.get_db),
-        id: int,
-) -> Any:
+@router.delete(
+    "/{id}",
+    response_model=schemas.Product
+)
+async def delete_product(
+    id: int
+) -> Dict:
     """ Delete a product. """
-    product = crud.product.get(db=db, id=id)
-    if not product:
-        raise HTTPException(status_code=404, detail="Product not found")
-    product = crud.product.remove(db=db, id=id)
-    return product
+    return {}
