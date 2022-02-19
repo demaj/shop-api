@@ -15,6 +15,5 @@ class CategoryFilter(BaseFilter):
 
 class ProductFilter(BaseFilter):
     name: Optional[str] = None
-    description: Optional[str] = None
     price: Optional[int] = None
     available: Optional[bool] = None

@@ -1,4 +1,4 @@
-# Handicraft Shop API
+# Shop API
 
 ## Getting started
 

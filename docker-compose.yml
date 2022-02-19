@@ -2,17 +2,20 @@ version: '3.9'
 
 services:
   web:
-    container_name: web
+    container_name: shop-web
     build:
       context: .
+      dockerfile: ./Dockerfile
     entrypoint: bash
     command: >
       -c "cd /code/app && uvicorn main:app --reload --host=0.0.0.0 --port=8000"
     volumes:
       - ./alembic:/code/alembic
       - ./app:/code/app
+      - ./tests:/code/tests
     env_file:
-      - app.secrets.env
+      - ./.envs/.local/app.secrets.env
+      - ./.envs/.local/db.secrets.env 
     ports:
       - "8000:8000"
     depends_on:
@@ -22,14 +25,15 @@ services:
     restart: unless-stopped
 
   db:
-    container_name: db
-    image: postgres:13.4-alpine3.14
+    container_name: shop-db
+    image: postgres:14.2
     volumes:
       - postgres_data:/var/lib/postgresql/data/pgdata
     env_file:
-      - app.secrets.env
+      - ./.envs/.local/app.secrets.env
+      - ./.envs/.local/db.secrets.env
     environment:
-      - PGDATA=/var/lib/postgresql/data/pgdata
+      PGDATA: /var/lib/postgresql/data/pgdata
     ports:
       - "5432:5432"
     networks:

@@ -1,8 +1,11 @@
 [flake8]
 ignore = F401
-max-line-length = 120
+max-line-length = 88
 exclude =
     .git,
+    .gitignore
     __pycache__,
-    tests/*
+    .venv,
+    .envs,
+    */migrations/*,
 max-complexity = 10

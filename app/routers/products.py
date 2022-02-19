@@ -1,7 +1,7 @@
 from typing import Dict
 
 import schemas
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from filters import ProductFilter
 from pagination import CategoryPagination
 from responses import ProductListResponse
