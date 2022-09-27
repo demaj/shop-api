@@ -7,11 +7,11 @@
 - docker-compose
 
 ### Startup:
-```commandline
+```bash
 docker-compose up -d --build
 ```
 
 ### Run tests:
-```shell
+```bash
 ./tests-run.sh
 ```

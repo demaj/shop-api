@@ -4,7 +4,6 @@ from pydantic import BaseModel
 
 
 class BaseFilter(BaseModel):
-
     class Config:
         use_enum_values = True
 

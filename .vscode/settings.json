@@ -1,30 +1,30 @@
 {
-    "python.defaultInterpreterPath": ".venv/bin/python",
-    "python.linting.enabled": true,
-    "python.linting.pylintEnabled": false,
-    "python.linting.flake8Enabled": true,
-    "python.linting.flake8Path": ".venv/bin/flake8",
-    "python.linting.flake8Args": ["--config", ".flake8"],
-    "python.formatting.provider": "black",
-    "python.formatting.blackPath": ".venv/bin/black",
-    "python.formatting.blackArgs": ["--config", "pyproject.toml"],
-    "python.testing.unittestEnabled": false,
-    "python.testing.pytestEnabled": true,
-    "python.testing.pytestArgs": ["tests"],
-    "python.languageServer": "Pylance",
-    "python.analysis.extraPaths": ["app", "tests"],
-    "python.autoComplete.extraPaths": ["app", "tests"],
-    "files.exclude": {
-        "**/.git": true,
-        "**/.svn": true,
-        "**/.hg": true,
-        "**/cvs": true,
-        "**/.DS_Store": true,
-        "**/.pytest_cache": true,
-        "**/__pycache__": true
-    },
-    "search.exclude": {
-        "**/.git": true,
-        "**/.venv": true,
-    },
+  "files.autoSave": "afterDelay",
+  "files.exclude": {
+    "**/.git": true,
+    "**/.svn": true,
+    "**/.hg": true,
+    "**/cvs": true,
+    "**/.DS_Store": true,
+    "**/.pytest_cache": true,
+    "**/__pycache__": true
+  },
+  "search.exclude": {
+    "**/.git": true,
+    "**/.venv": true
+  },
+  "python.defaultInterpreterPath": ".venv/bin/python",
+  "python.linting.enabled": true,
+  "python.linting.pylintEnabled": false,
+  "python.linting.flake8Enabled": true,
+  "python.linting.flake8Path": ".venv/bin/flake8",
+  "python.linting.flake8Args": ["--config", ".flake8"],
+  "python.formatting.provider": "black",
+  "python.formatting.blackPath": ".venv/bin/black",
+  "python.formatting.blackArgs": ["--config", "pyproject.toml"],
+  "python.testing.unittestEnabled": false,
+  "python.testing.pytestEnabled": true,
+  "python.testing.pytestArgs": ["tests"],
+  "python.analysis.extraPaths": ["shop_api", "tests"],
+  "python.autoComplete.extraPaths": ["shop_api", "tests"]
 }
