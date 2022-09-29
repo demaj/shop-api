@@ -40,14 +40,6 @@ extend_skip_glob = [
 
 [tool.black]
 line-length = 119
-exclude = '''
-/(
-    | .git
-    | .venv
-    | .vscode
-    | .pytest_cache
-)
-'''
 
 [tool.pytest.ini_options]
 minversion = "6.0"

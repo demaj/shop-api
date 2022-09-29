@@ -5,7 +5,7 @@ from pydantic import BaseSettings
 
 class Settings(BaseSettings):
     """
-    Settings Configuration
+    Application Settings Configuration
     """
 
     API_V1_STR: str = "/api/v1"

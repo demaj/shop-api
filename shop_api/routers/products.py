@@ -3,16 +3,15 @@ from typing import Dict
 import schemas
 from fastapi import APIRouter, Depends
 from filters import ProductFilter
-from pagination import CategoryPagination
-from responses import ProductListResponse
+
+from ..pagination import CategoryPagination
+from ..responses import ProductListResponse
 
 router = APIRouter(prefix="/products")
 
 
 @router.get("/", response_model=ProductListResponse)
-async def read_products(
-    filters: ProductFilter = Depends(), pagination: CategoryPagination = Depends()
-) -> Dict:
+async def read_products(filters: ProductFilter = Depends(), pagination: CategoryPagination = Depends()) -> Dict:
     """Retrieve products."""
     return {}
 

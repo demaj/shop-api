@@ -1,15 +1,15 @@
-from typing import Optional
+from datetime import datetime
 
 from pydantic import BaseModel
 
 
 class ProductBase(BaseModel):
-    name: Optional[str] = None
-    description: Optional[str] = None
-    price: Optional[int] = None
-    available: Optional[bool] = None
-    created: Optional[str] = None
-    updated: Optional[str] = None
+    name: str | None = None
+    description: str | None = None
+    price: str | None = None
+    available: bool | None = None
+    created: datetime | None = None
+    updated: datetime | None = None
 
 
 class ProductCreate(ProductBase):

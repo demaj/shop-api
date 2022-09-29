@@ -1,7 +1,8 @@
 from typing import Dict, List, Optional
 
 from pydantic import BaseModel
-from schemas import Category, Product
+
+from .schemas import Category, Product
 
 
 class ListResponse(BaseModel):

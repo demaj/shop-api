@@ -1,7 +1,7 @@
-from core.database import Base
-from sqlalchemy import (Boolean, Column, DateTime, ForeignKey, Integer, String,
-                        func)
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, func
 from sqlalchemy.orm import relationship
+
+from ..core.database import Base
 
 
 class Category(Base):
@@ -19,7 +19,7 @@ class Product(Base):
     id = Column(Integer, primary_key=True, index=True)
     category_id = Column(Integer, ForeignKey("categories.id"), nullable=False)
     name = Column(String, index=True)
-    description = Column(String, index=True)
+    description = Column(String)
     price = Column(Integer)
     available = Column(Boolean, default=True)
     created = Column(DateTime(timezone=True), server_default=func.now())
