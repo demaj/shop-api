@@ -25,6 +25,6 @@
   "python.testing.unittestEnabled": false,
   "python.testing.pytestEnabled": true,
   "python.testing.pytestArgs": ["tests"],
-  "python.analysis.extraPaths": ["shop_api", "tests"],
-  "python.autoComplete.extraPaths": ["shop_api", "tests"]
+  "python.analysis.extraPaths": ["app", "tests"],
+  "python.autoComplete.extraPaths": ["app", "tests"]
 }

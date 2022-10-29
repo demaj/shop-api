@@ -1,50 +1,119 @@
-from typing import Dict
+from http import HTTPStatus
+
+from fastapi import APIRouter, Depends, Path
+from sqlalchemy.ext.asyncio import AsyncSession
 
 import schemas
-from fastapi import APIRouter, Depends
+from core.dependencies import get_db
 from filters import CategoryFilter
+from pagination import CategoryPagination
+from responses import CategoryListResponse
 
-from ..pagination import CategoryPagination
-from ..responses import CategoryListResponse
+from .tags import Tags
 
-router = APIRouter(prefix="/categories")
+router = APIRouter(prefix="/categories", tags=[Tags.categories])
 
 
-@router.get("/", response_model=CategoryListResponse, response_model_exclude_none=True)
-async def read_categories(filters: CategoryFilter = Depends(), pagination: CategoryPagination = Depends()) -> Dict:
+@router.get(
+    "/",
+    response_model=CategoryListResponse,
+    response_model_exclude_none=True,
+    status_code=HTTPStatus.OK,
+)
+async def read_categories(
+    db: AsyncSession = Depends(get_db),
+    filters: CategoryFilter = Depends(),
+    pagination: CategoryPagination = Depends(),
+) -> dict:
     """
-    Retrieve Categories.
+    Retrieve List of Categories.
     """
-    return {}
+
+    query_values = {**pagination.dict()}
+
+    query = """SELECT * FROM categories"""
+
+    results = await db.execute(query, params=query_values)
+    return {
+        "filters": filters.dict(),
+        "paging": pagination.dict(),
+        "results": [result for result in results],
+    }
 
 
-@router.post("/", response_model=schemas.Category)
-async def create_category(category_in: schemas.CategoryCreate) -> Dict:
+@router.post(
+    "/",
+    response_model=schemas.Category,
+    summary="Create a category",
+    status_code=HTTPStatus.CREATED,
+)
+async def create_category(
+    category_in: schemas.CategoryCreate,
+    db: AsyncSession = Depends(get_db),
+) -> dict:
     """
     Create new Category.
     """
-    return {}
+
+    query = f"""INSERT INTO categories(name) VALUES ({category_in.name})"""
+
+    results = await db.execute(query)
+    return results
 
 
-@router.put("/{id}", response_model=schemas.Category)
-async def update_category(id: int, category_in: schemas.CategoryBase) -> Dict:
+@router.put(
+    "/{category_id}",
+    response_model=schemas.Category,
+    status_code=HTTPStatus.OK,
+)
+async def update_category(
+    *,
+    category_id: int = Path(title="The ID of the `category` to update"),
+    category_in: schemas.CategoryBase,
+    db: AsyncSession = Depends(get_db),
+) -> dict:
     """
     Update a Category.
     """
-    return {}
+
+    query = """UPDATE FROM categories WHERE ('Tea')"""
+
+    results = await db.execute(query)
+    return results
 
 
-@router.get("/{id}", response_model=schemas.Category)
-async def read_category(id: int) -> Dict:
+@router.get(
+    "/{category_id}",
+    response_model=schemas.Category,
+    status_code=HTTPStatus.OK,
+)
+async def read_category(
+    category_id: int = Path(title="The ID of the `category` to get"),
+    db: AsyncSession = Depends(get_db),
+) -> dict:
     """
     Get category by ID.
     """
-    return {}
+    query = """SELECT * FROM categories WHERE :id="""
+
+    results = await db.execute(query)
+    return results
 
 
-@router.delete("/{id}", response_model=schemas.Category)
-async def delete_category(id: int) -> Dict:
+@router.delete(
+    "/{category_id}",
+    response_model=schemas.Category,
+    status_code=HTTPStatus.OK,
+)
+async def delete_category(
+    category_id: int = Path(title="The ID of the `category` to delete"), db: AsyncSession = Depends(get_db)
+) -> dict:
     """
     Delete a category.
     """
-    return {}
+
+    query = """DELETE FROM categories WHERE :id="""
+
+    results = await db.execute(query)
+
+    return results

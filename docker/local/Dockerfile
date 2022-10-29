@@ -15,11 +15,9 @@ ENV PATH="/opt/venv/bin:$PATH"
 WORKDIR /code
 
 # Copy project and requirements
-COPY requirements.txt requirements.txt
-COPY shop_api shop_api
-COPY tests tests
-COPY alembic alembic
-COPY alembic.ini alembic.ini
+COPY ./requirements.txt ./requirements.txt
+COPY ./shop_api ./shop_api
+COPY ./tests ./tests
 
 # Install python dependencies
 RUN python -m venv /opt/venv && \

@@ -1,11 +1,19 @@
-.PHONY: build
-build:
-	@docker-compose -f docker-compose.yml build
+.PHONY: start
+start:
+	@docker compose up -d --build
 
-.PHONY: run
-run:
-	@docker-compose -f docker-compose.yml up
+.PHONY: stop
+stop:
+	@docker compose down
 
-.PHONY: down
-down:
-	@docker-compose -f docker-compose.yml down
+.PHONY: migrate
+migrate:
+	@docker compose exec web alembic upgrade head
+
+.PHONY: logs
+logs:
+	@docker logs -f shop-web
+
+.PHONY: reqs
+reqs:
+	@poetry export -f requirements.txt -o requirements.txt --without-hashes

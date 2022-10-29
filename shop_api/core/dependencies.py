@@ -1,12 +1,12 @@
 from typing import Generator
 
-from core.database import SessionLocal
+from .database import AsyncSessionLocal
 
 
 # Dependency
-def get_db() -> Generator:
+async def get_db() -> Generator:
     try:
-        db = SessionLocal()
+        db = AsyncSessionLocal()
         yield db
     finally:
         db.close()

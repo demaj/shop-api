@@ -8,10 +8,22 @@
 
 ### Startup:
 ```bash
-docker-compose up -d --build
+make start
+```
+
+### Apply migrations
+```bash
+make migrate
 ```
 
 ### Run tests:
 ```bash
 ./tests-run.sh
 ```
+
+### To-Do:
+- Add docs
+- Redis
+- Traefik
+- Celery
+- 
