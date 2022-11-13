@@ -1,6 +1,8 @@
 from fastapi import Query
 from pydantic import BaseModel
 
+from schemas.product import ProductStatus
+
 
 class BaseFilter(BaseModel):
     class Config:
@@ -10,8 +12,8 @@ class BaseFilter(BaseModel):
 class CategoryFilter(BaseFilter):
     name: str | None = Query(
         default=None,
-        title="Category name",
-        description="The name of the `category` to get",
+        title="Category's name",
+        description="The name of the `Category` to get",
         min_length=3,
         max_length=50,
     )
@@ -20,18 +22,18 @@ class CategoryFilter(BaseFilter):
 class ProductFilter(BaseFilter):
     name: str | None = Query(
         default=None,
-        title="Product name",
-        description="The name of the `product` to get",
+        title="Product's name",
+        description="The name of the `Product` to get",
         min_length=3,
         max_length=50,
     )
     price: float | None = Query(
         default=None,
-        title="Product price",
-        description="The price of the `product` you want to get",
+        title="Product's price",
+        description="The price of the `Product` you want to get",
     )
-    available: bool | None = Query(
-        default=None,
-        title="Product Availability",
-        description="Is the `product` currently available",
+    available: ProductStatus | None = Query(
+        default=ProductStatus.available,
+        title="Product's availability",
+        description="Is the `Product` currently available",
     )

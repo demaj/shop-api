@@ -8,7 +8,7 @@ class Category(Base):
     __tablename__ = "categories"
 
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, index=True)
+    name = Column(String(255), index=True)
 
     product = relationship("Product", back_populates="category")
 
@@ -23,7 +23,7 @@ class Product(Base):
     name = Column(String, index=True)
     description = Column(String)
     price = Column(Integer)
-    available = Column(Boolean, default=True)
+    status = Column(Boolean, default=True)
     category_id = Column(Integer, ForeignKey("categories.id"), nullable=False)
     created = Column(DateTime(timezone=True), server_default=func.now())
     updated = Column(DateTime(timezone=True), onupdate=func.now())

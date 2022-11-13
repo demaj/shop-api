@@ -1,8 +1,10 @@
 from http import HTTPStatus
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Path
+from sqlalchemy.ext.asyncio import AsyncSession
 
 import schemas
+from core.dependencies import get_db
 from filters import ProductFilter
 from pagination import ProductPagination
 from responses import ProductListResponse
@@ -15,37 +17,67 @@ router = APIRouter(prefix="/products", tags=[Tags.products])
 @router.get(
     "/",
     response_model=ProductListResponse,
+    response_model_exclude_none=True,
     status_code=HTTPStatus.OK,
 )
-async def read_products(filters: ProductFilter = Depends(), pagination: ProductPagination = Depends()) -> dict:
+async def read_products(
+    db: AsyncSession = Depends(get_db),
+    filters: ProductFilter = Depends(),
+    pagination: ProductPagination = Depends(),
+) -> dict:
     """
-    Retrieve products.
+    Retrieve List of `Products`.
     """
-    return {}
+
+    query_values = {**pagination.dict()}
+
+    query = "SELECT * FROM products;"
+
+    results = await db.execute(query, params=query_values)
+    return {
+        "filters": filters.dict(),
+        "paging": pagination.dict(),
+        results: [result for result in results],
+    }
 
 
 @router.post(
     "/",
-    response_model=schemas.Product,
+    response_model=schemas.ProductCreate,
+    summary="Create a product",
     status_code=HTTPStatus.CREATED,
 )
-async def create_product(product_in: schemas.ProductCreate) -> dict:
+async def create_product(
+    product_in: schemas.ProductCreate,
+    db: AsyncSession = Depends(get_db),
+) -> dict:
     """
-    Create new product.
+    Create a new `Product`.
     """
-    return {}
+
+    query = f"""INSERT INTO product VALUES('{product_in.name}') * FROM products;"""
+    results = await db.execute(query)
+    return results
 
 
 @router.put(
-    "/{id}",
+    "/{product_id}",
     response_model=schemas.Product,
     status_code=HTTPStatus.OK,
 )
-async def update_product(id: int, product_in: schemas.ProductBase) -> dict:
+async def update_product(
+    *,
+    product_id: str = Path(title="The ID of the `Product` to update"),
+    product_in: schemas.ProductBase,
+    db: AsyncSession = Depends(get_db),
+) -> dict:
     """
-    Update a product.
+    Update a `Product`.
     """
-    return {}
+
+    query = "SELECT * FROM products;"
+    results = await db.execute(query)
+    return results
 
 
 @router.get(
@@ -53,11 +85,17 @@ async def update_product(id: int, product_in: schemas.ProductBase) -> dict:
     response_model=schemas.Product,
     status_code=HTTPStatus.OK,
 )
-async def read_product(id: int) -> dict:
+async def read_product(
+    product_id: str = Path(title="The ID of the `Product` to get"),
+    db: AsyncSession = Depends(get_db),
+) -> dict:
     """
-    Get product by ID.
+    Get `Product` by ID.
     """
-    return {}
+
+    query = "SELECT * FROM products;"
+    results = await db.execute(query)
+    return results
 
 
 @router.delete(
@@ -65,8 +103,14 @@ async def read_product(id: int) -> dict:
     response_model=schemas.Product,
     status_code=HTTPStatus.OK,
 )
-async def delete_product(id: int) -> dict:
+async def delete_product(
+    product_id: str = Path(title="The ID of the `Product` to delete"),
+    db: AsyncSession = Depends(get_db),
+) -> dict:
     """
-    Delete a product.
+    Delete a `Product`.
     """
-    return {}
+
+    query = "SELECT * FROM products;"
+    results = await db.execute(query)
+    return results

@@ -1,36 +1,64 @@
-[tool.poetry]
-name = "shop-api"
-version = "0.1.0"
-description = "Shop API"
-authors = ["Gentian Demaj <gentiani101@gmail.com>"]
-readme = "README.md"
-packages = [{include = "shop_api"}]
-
-[tool.poetry.dependencies]
-python = "^3.10"
-fastapi = "^0.85.0"
-pydantic = {extras = ["email"], version = "^1.10.2"}
-SQLAlchemy = {extras = ["asyncio"], version = "^1.4.41"}
-alembic = "^1.8.1"
-databases = {extras = ["asyncpg"], version = "^0.6.1"}
-uvicorn = {extras = ["standard"], version = "^0.18.3"}
-asyncpg = "^0.26.0"
-psycopg2-binary = "^2.9.3"
-email-validator = "^1.3.0"
-
-
-[tool.poetry.group.dev.dependencies]
-isort = "^5.10.1"
-black = "^22.8.0"
-flake8 = "^5.0.4"
-
-
-[tool.poetry.group.test.dependencies]
-pytest = "^7.1.3"
-
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "shop-api"
+description = 'Shop API'
+readme = "README.md"
+requires-python = ">=3.7"
+license = "MIT"
+keywords = []
+authors = [
+  { name = "Gentian Demaj", email = "gentiai101@gmail.com" },
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.7",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Programming Language :: Python :: Implementation :: PyPy",
+]
+dependencies = []
+dynamic = ["version"]
+
+[project.urls]
+Documentation = "https://github.com/demaj/shop-api#readme"
+Issues = "https://github.com/demaj/shop-api/issues"
+Source = "https://github.com/demaj/shop-api"
+
+[tool.hatch.version]
+path = "shop_api/__about__.py"
+
+[tool.hatch.envs.default]
+dependencies = [
+  "pytest",
+  "pytest-cov",
+]
+[tool.hatch.envs.default.scripts]
+cov = "pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=shop_api --cov=tests {args}"
+no-cov = "cov --no-cov {args}"
+
+[[tool.hatch.envs.test.matrix]]
+python = ["37", "38", "39", "310", "311"]
+
+[tool.coverage.run]
+branch = true
+parallel = true
+omit = [
+  "shop_api/__about__.py",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+  "no cov",
+  "if __name__ == .__main__.:",
+  "if TYPE_CHECKING:",
+]
 
 [tool.isort]
 profile = "black"
@@ -39,6 +67,8 @@ extend_skip_glob = [
     ".git",
     ".venv",
     ".vscode",
+    ".envs",
+    ".github",
     ".pytest_cache"
 ]
 known_third_party = [

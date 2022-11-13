@@ -1,0 +1,6 @@
+POST http://127.0.0.1:8000/categories HTTP/1.1
+Content-Type: application/json
+
+{
+    "name": "Bread"
+}

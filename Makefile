@@ -13,7 +13,3 @@ migrate:
 .PHONY: logs
 logs:
 	@docker logs -f shop-web
-
-.PHONY: reqs
-reqs:
-	@poetry export -f requirements.txt -o requirements.txt --without-hashes

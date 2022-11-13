@@ -4,7 +4,9 @@ from fastapi import APIRouter, Depends, Path
 from sqlalchemy.ext.asyncio import AsyncSession
 
 import schemas
+import crud
 from core.dependencies import get_db
+from core.database import AsyncSessionLocal
 from filters import CategoryFilter
 from pagination import CategoryPagination
 from responses import CategoryListResponse
@@ -26,12 +28,12 @@ async def read_categories(
     pagination: CategoryPagination = Depends(),
 ) -> dict:
     """
-    Retrieve List of Categories.
+    Retrieve List of `Categories`.
     """
 
     query_values = {**pagination.dict()}
 
-    query = """SELECT * FROM categories"""
+    query = """SELECT * FROM categories;"""
 
     results = await db.execute(query, params=query_values)
     return {
@@ -43,8 +45,8 @@ async def read_categories(
 
 @router.post(
     "/",
-    response_model=schemas.Category,
-    summary="Create a category",
+    # response_model=schemas.CategoryCreate,
+    summary="Create a Category",
     status_code=HTTPStatus.CREATED,
 )
 async def create_category(
@@ -52,12 +54,14 @@ async def create_category(
     db: AsyncSession = Depends(get_db),
 ) -> dict:
     """
-    Create new Category.
+    Create a new `Category`.
     """
 
-    query = f"""INSERT INTO categories(name) VALUES ({category_in.name})"""
+    query = f"""INSERT INTO categories(name) VALUES ('{category_in.name}');"""
 
-    results = await db.execute(query)
+    # TODO: Fix: It gets into a loop.
+    results = await crud.category.create(db=db, obj_in=category_in)
+    print("RESULTS: ", results)
     return results
 
 
@@ -73,10 +77,10 @@ async def update_category(
     db: AsyncSession = Depends(get_db),
 ) -> dict:
     """
-    Update a Category.
+    Update a `Category`.
     """
 
-    query = """UPDATE FROM categories WHERE ('Tea')"""
+    query = """UPDATE FROM categories WHERE ('Tea');"""
 
     results = await db.execute(query)
     return results
@@ -92,9 +96,9 @@ async def read_category(
     db: AsyncSession = Depends(get_db),
 ) -> dict:
     """
-    Get category by ID.
+    Get `Category` by ID.
     """
-    query = """SELECT * FROM categories WHERE :id="""
+    query = """SELECT * FROM categories WHERE :id=;"""
 
     results = await db.execute(query)
     return results
@@ -106,13 +110,14 @@ async def read_category(
     status_code=HTTPStatus.OK,
 )
 async def delete_category(
-    category_id: int = Path(title="The ID of the `category` to delete"), db: AsyncSession = Depends(get_db)
+    category_id: str = Path(title="The ID of the `category` to delete"),
+    db: AsyncSession = Depends(get_db),
 ) -> dict:
     """
-    Delete a category.
+    Delete a `Category`.
     """
 
-    query = """DELETE FROM categories WHERE :id="""
+    query = """DELETE FROM categories WHERE :id=;"""
 
     results = await db.execute(query)
 
