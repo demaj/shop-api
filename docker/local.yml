@@ -8,7 +8,7 @@ services:
       dockerfile: ./Dockerfile
     entrypoint: bash
     command: >
-      -c "cd /code/shop_api && uvicorn main:app --reload --host=0.0.0.0 --port=8000"
+      -c "cd /code/shop_api && uvicorn main:app --reload --host=0.0.0.0 --port=8080"
     volumes:
       - ./alembic:/code/alembic
       - ./shop_api:/code/shop_api
@@ -16,7 +16,7 @@ services:
     env_file:
       - ./.envs/.local/app.secrets.env
     ports:
-      - "8000:8000"
+      - "8080:8080"
     depends_on:
       - db
     networks:

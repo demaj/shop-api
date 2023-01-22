@@ -13,3 +13,7 @@ migrate:
 .PHONY: logs
 logs:
 	@docker logs -f shop-web
+
+.PHONY: clean
+clean:
+	@docker system prune --volumes --all || true

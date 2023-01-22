@@ -1,6 +1,8 @@
 from http import HTTPStatus
+from typing import Any
 
 from fastapi import APIRouter, Depends, Path
+from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 import schemas
@@ -24,40 +26,57 @@ async def read_products(
     db: AsyncSession = Depends(get_db),
     filters: ProductFilter = Depends(),
     pagination: ProductPagination = Depends(),
-) -> dict:
+) -> ProductListResponse:
     """
     Retrieve List of `Products`.
     """
 
-    query_values = {**pagination.dict()}
+    params: dict[str, Any] = {
+        **filters.dict(exclude_none=True),
+        **pagination.dict(),
+    }
 
-    query = "SELECT * FROM products;"
+    query = "SELECT * FROM products"
 
-    results = await db.execute(query, params=query_values)
+    if filters.name:
+        query += " name = :name"
+        params |= {"name": filters.name}
+
+    query += " LIMIT :limit OFFSET :offset"
+
+    results = await db.execute(statement=text(query), params=params)
     return {
         "filters": filters.dict(),
         "paging": pagination.dict(),
-        results: [result for result in results],
+        "results": [result for result in results],
     }
 
 
 @router.post(
     "/",
     response_model=schemas.ProductCreate,
-    summary="Create a product",
+    summary="Create a Product",
     status_code=HTTPStatus.CREATED,
 )
 async def create_product(
     product_in: schemas.ProductCreate,
     db: AsyncSession = Depends(get_db),
-) -> dict:
+) -> schemas.Category:
     """
     Create a new `Product`.
     """
 
-    query = f"""INSERT INTO product VALUES('{product_in.name}') * FROM products;"""
-    results = await db.execute(query)
-    return results
+    params: dict[str, Any] = {
+        **product_in.dict(exclude_none=True),
+    }
+
+    query = """
+        INSERT INTO product(name, price)
+        VALUES (:name, :price)
+    """
+
+    product_id = await db.execute(statement=text(query), params=params) or None
+    return params | dict(product_id.mappings().first())
 
 
 @router.put(
@@ -69,7 +88,7 @@ async def update_product(
     *,
     product_id: str = Path(title="The ID of the `Product` to update"),
     product_in: schemas.ProductBase,
-    db: AsyncSession = Depends(get_db),
+    db: AsyncSession = Depends(get_db)
 ) -> dict:
     """
     Update a `Product`.
@@ -93,8 +112,9 @@ async def read_product(
     Get `Product` by ID.
     """
 
-    query = "SELECT * FROM products;"
-    results = await db.execute(query)
+    query = "SELECT * FROM products WHERE id=;"
+
+    results = await db.fetch_one(query)
     return results
 
 
@@ -110,7 +130,8 @@ async def delete_product(
     """
     Delete a `Product`.
     """
+    params = {**product_id.dict(exclude_none=True)}
 
-    query = "SELECT * FROM products;"
-    results = await db.execute(query)
+    query = "DELETE FROM products WHERE id = :id"
+    results = await db.execute(statement=text(query), params=params)
     return results

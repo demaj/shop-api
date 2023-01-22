@@ -3,19 +3,22 @@ from typing import AsyncGenerator
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from .database import AsyncSessionLocal
+from .database import AsyncSessionLocal, async_engine
+
+# async def get_db() -> AsyncGenerator[AsyncSession, None]:
+#     async with AsyncSessionLocal.begin() as db:
+#         yield db
+#     await async_engine.dispose()
 
 
-# Dependency
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
+    async_session = AsyncSessionLocal()
     try:
-        db = AsyncSessionLocal()
-        yield db
-        # await db.commit()
+        yield async_session
+        await async_session.commit()
     except SQLAlchemyError as exc:
-        await db.rollback()
-        raise exc
-    except Exception as exc:
+        await async_session.rollback()
         raise exc
     finally:
-        await db.close()
+        await async_session.close()
+        await async_engine.dispose()

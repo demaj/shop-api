@@ -22,8 +22,11 @@ make migrate
 ```
 
 ### To-Do:
-- Add docs
+- Docs
 - Redis
 - Traefik
 - Celery
-- 
+- dbdiagram.io
+- Pydantic/attrs
+- Host Render
+- [Session Basics](https://docs.sqlalchemy.org/en/14/orm/session_basics.html#)

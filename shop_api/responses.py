@@ -5,7 +5,7 @@ from schemas import Category, Product
 
 class ListResponse(BaseModel):
     filters: dict | None
-    pagination: dict | None
+    paging: dict | None
 
 
 class CategoryListResponse(ListResponse):

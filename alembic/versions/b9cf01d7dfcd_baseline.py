@@ -21,7 +21,7 @@ def upgrade() -> None:
     op.create_table(
         "categories",
         sa.Column("id", UUID(as_uuid=True), primary_key=True, server_default=sa.text("gen_random_uuid()")),
-        sa.Column("name", sa.String(50), nullable=False),
+        sa.Column("name", sa.String(50), unique=True, nullable=False),
     )
     op.create_index(op.f("idx_categories_id"), "categories", ["id"], unique=True)
     op.create_table(
