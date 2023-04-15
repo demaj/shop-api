@@ -7,11 +7,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 import schemas
 from core.dependencies import get_db
-from filters import CategoryFilter
-from pagination import CategoryPagination
-from responses import CategoryListResponse
-
-from .tags import Tags
+from helpers.filters import CategoryFilter
+from helpers.pagination import CategoryPagination
+from helpers.responses import CategoryListResponse
+from helpers.tags import Tags
 
 router = APIRouter(prefix="/categories", tags=[Tags.categories])
 

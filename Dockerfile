@@ -1,5 +1,5 @@
 # Pull official base image
-FROM python:3.11.1
+FROM python:3.11.2
 LABEL maintainer="Gentian Demaj <gentiani101@gmail.com>"
 
 # Update system dependencies
@@ -23,21 +23,18 @@ WORKDIR /code
 COPY requirements.txt requirements.txt
 COPY shop_api shop_api
 COPY tests tests
+COPY scripts scripts
 COPY alembic alembic
 COPY alembic.ini alembic.ini
-COPY docker-entrypoint.sh docker-entrypoint.sh
 
 # Install dependencies
 RUN python -m pip install --no-cache-dir --upgrade pip && \
     python -m pip install -r requirements.txt && \
     adduser --disabled-password --no-create-home app && \
-    chown -R app:app /opt/venv && \
-    chmod +x docker-entrypoint.sh
+    chown -R app:app /opt/venv
 
 # Use newly created user
 USER app
 
 # Sanity check
 RUN python --version
-
-# ENTRYPOINT [ "./docker-entrypoint.sh" ]

@@ -1,10 +1,11 @@
+from typing import Union
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, Field, Required
 
 
 class CategoryBase(BaseModel):
-    name: str | None = None
+    name: Union[str, None] = None
 
 
 class CategoryCreate(CategoryBase):

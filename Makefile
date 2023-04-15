@@ -16,4 +16,8 @@ logs:
 
 .PHONY: clean
 clean:
-	@docker system prune --volumes --all || true
+	@docker system prune --volumes --all --force
+
+.PHONY: test
+test:
+	@python -m pytest

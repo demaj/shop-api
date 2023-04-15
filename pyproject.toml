@@ -73,18 +73,18 @@ extend_skip_glob = [
 ]
 known_third_party = [
     "fastapi",
+    "starlette",
     "sqlalchemy",
     "databases",
+    "pytest"
 ]
-known_first_party = [
+known_local_folder = [
     "core",
     "crud",
+    "helpers",
     "models",
     "routers",
-    "schemas",
-    "filters",
-    "pagination",
-    "responses"
+    "schemas"
 ]
 
 [tool.black]
@@ -92,7 +92,8 @@ line-length = 119
 
 [tool.pytest.ini_options]
 minversion = "6.0"
-addopts = "-ra -q --color=yes"
+addopts = "-ra -q --color=yes --import-mode=importlib"
+pythonpath = "shop_api"
 testpaths = [
     "tests",
     "e2e",

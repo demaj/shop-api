@@ -1,6 +1,5 @@
-from schemas import Category, CategoryBase, CategoryCreate
-
 from .base import CRUDBase
+from schemas import Category, CategoryBase, CategoryCreate
 
 
 class CRUDCategory(CRUDBase[Category, CategoryCreate, CategoryBase]):

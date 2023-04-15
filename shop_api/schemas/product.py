@@ -1,5 +1,6 @@
 from datetime import datetime
 from enum import Enum
+from typing import Union
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, Field, HttpUrl, Required, validator
@@ -17,14 +18,14 @@ class ProductImage(BaseModel):
 
 
 class ProductBase(BaseModel):
-    name: str | None = None
-    description: str | None = Field(default=None, title="The description of the `product`", max_length=300)
-    price: float | None = None
+    name: Union[str, None] = None
+    description: Union[str, None] = Field(default=None, title="The description of the `product`", max_length=300)
+    price: Union[float, None] = None
     status: ProductStatus = Field(default=ProductStatus.available, title="Product status")
     category_id: UUID = Field(default=None, title="Category ID")
-    tags: set[str] | None = set()
-    created: datetime | None = None
-    updated: datetime | None = None
+    tags: Union[set[str], None] = set()
+    created: Union[datetime, None] = None
+    updated: Union[datetime, None] = None
 
 
 class ProductCreate(ProductBase):

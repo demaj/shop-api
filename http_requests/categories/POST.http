@@ -1,0 +1,7 @@
+POST http://127.0.0.1:8080/categories HTTP/1.1
+Content-Type: application/json
+X-Request-Id: f5059eee-7d1c-4e86-91f9-dcc9dc2ac6e2
+
+{
+    "name": "Tea"
+}
