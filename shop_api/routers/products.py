@@ -87,7 +87,7 @@ async def update_product(
     *,
     product_id: str = Path(title="The ID of the `Product` to update"),
     product_in: schemas.ProductBase,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
 ) -> dict:
     """
     Update a `Product`.

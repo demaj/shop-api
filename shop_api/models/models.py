@@ -4,6 +4,19 @@ from sqlalchemy.orm import relationship
 from core.database import Base
 
 
+class User(Base):
+    __tablename__ = "users"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(255), index=True)
+    hashed_password = Column(String, nullable=False)
+    is_active = Column(Boolean(), default=True)
+    is_superuser = Column(Boolean(), default=False)
+
+    def __repr__(self) -> str:
+        return f"User(id={self.id!r}, name={self.name!r})"
+
+
 class Category(Base):
     __tablename__ = "categories"
 

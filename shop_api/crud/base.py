@@ -1,4 +1,4 @@
-from typing import Any, Dict, Generic, List, Type, TypeVar, Union
+from typing import Any, Dict, Generic, List, Type, TypeVar
 
 from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel
@@ -27,7 +27,7 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
     async def get_list(self, db: AsyncSession, *, skip: int = 0, limit: int = 100) -> List[ModelType]:
         return await db.query(self.model).offset(skip).limit(limit).all()
 
-    async def get(self, db: AsyncSession, id: Any) -> Union[ModelType, None]:
+    async def get(self, db: AsyncSession, id: Any) -> ModelType | None:
         return await db.query(self.model).filter(self.model.id == id).first()
 
     async def create(self, db: AsyncSession, *, obj_in: CreateSchemaType) -> ModelType:
@@ -39,7 +39,7 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         return db_obj
 
     async def update(
-        self, db: AsyncSession, *, db_obj: ModelType, obj_in: Union[UpdateSchemaType, Dict[str, Any]]
+        self, db: AsyncSession, *, db_obj: ModelType, obj_in: UpdateSchemaType | Dict[str, Any]
     ) -> ModelType:
         obj_data = jsonable_encoder(db_obj)
         if isinstance(obj_in, dict):

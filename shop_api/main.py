@@ -2,9 +2,11 @@ import logging
 import time
 from http import HTTPStatus
 from typing import Callable, Dict
+from uuid import uuid4
 
-from fastapi import FastAPI
 from asgi_correlation_id import CorrelationIdMiddleware
+from fastapi import FastAPI
+from fastapi.security import HTTPBasic
 from starlette.middleware.cors import CORSMiddleware
 from starlette.requests import Request
 from starlette.responses import Response
@@ -12,7 +14,6 @@ from starlette.responses import Response
 from core.config import Settings, get_settings
 from helpers.constants import CORRELATION_ID
 from routers import categories, products
-from uuid import uuid4
 
 # Logging
 logger = logging.getLogger(__name__)
@@ -26,6 +27,7 @@ app = FastAPI(
     title=settings.PROJECT_TITLE,
     description=settings.PROJECT_DESCRIPTION,
     version=settings.PROJECT_VERSION,
+    openapi_prefix=settings.API_V1_STR,
 )
 
 app.add_middleware(
@@ -42,6 +44,8 @@ app.add_middleware(
     update_request_header=True,
     generator=lambda: str(uuid4()),
 )
+
+security = HTTPBasic()
 
 
 @app.middleware("http")

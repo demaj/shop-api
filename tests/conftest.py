@@ -1,6 +1,7 @@
 from importlib import reload
 
 import pytest
+from fastapi import FastAPI
 from httpx import AsyncClient
 
 BASE_URL = "http://api.shop.com"
@@ -15,6 +16,6 @@ async def app():
 
 
 @pytest.fixture
-async def async_client(app):
+async def async_client(app: FastAPI) -> AsyncClient:
     async with AsyncClient(app=app, base_url=BASE_URL) as async_client:
         yield async_client

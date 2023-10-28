@@ -1,5 +1,6 @@
 from .category import Category, CategoryBase, CategoryCreate
 from .product import Product, ProductBase, ProductCreate
+from .user import User, UserCreate, UserInDB
 
 __all__ = [
     "Category",
@@ -8,4 +9,7 @@ __all__ = [
     "Product",
     "ProductBase",
     "ProductCreate",
+    "User",
+    "UserCreate",
+    "UserInDB",
 ]
