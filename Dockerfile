@@ -1,5 +1,5 @@
 # Pull official base image
-FROM python:3.11.2
+FROM python:3.12.8-slim-bookworm
 LABEL maintainer="Gentian Demaj <gentiani101@gmail.com>"
 
 # Update system dependencies

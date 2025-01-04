@@ -2,26 +2,31 @@
 
 ## Getting started
 
-### Requirements:
+### Requirements
+
 - docker
 - docker-compose
 
-### Startup:
+### Startup
+
 ```bash
 make start
 ```
 
 ### Apply migrations
+
 ```bash
 make migrate
 ```
 
-### Run tests:
+### Run tests
+
 ```bash
 ./tests-run.sh
 ```
 
-### To-Do:
+### To-Do
+
 - Docs
 - Redis
 - Traefik
