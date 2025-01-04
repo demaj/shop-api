@@ -1,5 +1,6 @@
 import logging
 import time
+from contextlib import asynccontextmanager
 from http import HTTPStatus
 from typing import Callable, Dict
 from uuid import uuid4
@@ -23,11 +24,19 @@ logger.setLevel(logging.INFO)
 settings: Settings = get_settings()
 
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    logger.info("Application started")
+    yield
+    logger.info("Application shutdown")
+
+
 app = FastAPI(
     title=settings.PROJECT_TITLE,
     description=settings.PROJECT_DESCRIPTION,
     version=settings.PROJECT_VERSION,
     openapi_prefix=settings.API_V1_STR,
+    lifespan=lifespan,
 )
 
 app.add_middleware(
@@ -65,20 +74,6 @@ async def log_requests(request: Request, call_next: Callable) -> Response:
     _correlation_id = response.headers.get(CORRELATION_ID)
     logger.info(f"Outgoing response: {_correlation_id}")
     return response
-
-
-@app.on_event("startup")
-async def on_startup() -> None:
-    logger.info("Starting application")
-    # Do something
-    logger.info("Application started")
-
-
-@app.on_event("shutdown")
-async def on_shutdown() -> None:
-    logger.info("Shutting down application")
-    # Clean
-    logger.info("Application shutdown")
 
 
 @app.get("/", summary="Status", status_code=HTTPStatus.OK)

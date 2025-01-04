@@ -14,8 +14,8 @@ class Settings(BaseSettings):
 
     PROJECT_NAME: str = "shop-api"
     PROJECT_TITLE: str = "Shop API"
-    PROJECT_DESCRIPTION: str = "Shop API.."
-    PROJECT_VERSION: str = "0.1.0"
+    PROJECT_DESCRIPTION: str = "Shop API Introduction"
+    PROJECT_VERSION: str = "0.2.0"
 
     DATABASE_URI: str = os.getenv("DATABASE_URI")
 
