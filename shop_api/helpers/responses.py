@@ -4,8 +4,8 @@ from schemas import Category, Product
 
 
 class ListResponse(BaseModel):
-    filters: dict | None
-    paging: dict | None
+    filters: dict | None = None
+    paging: dict | None = None
 
 
 class CategoryListResponse(ListResponse):

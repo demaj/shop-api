@@ -31,8 +31,8 @@ async def read_categories(
     """
 
     params: dict[str, Any] = {
-        **filters.dict(exclude_none=True),
-        **pagination.dict(),
+        **filters.model_dump(exclude_none=True),
+        **pagination.model_dump(),
     }
 
     query = "SELECT categories.id, categories.name FROM categories"
@@ -45,8 +45,8 @@ async def read_categories(
 
     results = await db.execute(statement=text(query), params=params)
     return {
-        "filters": filters.dict(),
-        "paging": pagination.dict(),
+        "filters": filters.model_dump(),
+        "paging": pagination.model_dump(),
         "results": [result for result in results],
     }
 
@@ -66,7 +66,7 @@ async def create_category(
     """
 
     params: dict[str, Any] = {
-        **category_in.dict(exclude_none=True),
+        **category_in.model_dump(exclude_none=True),
     }
 
     query = """
@@ -95,7 +95,7 @@ async def update_category(
 
     params: dict[str, Any] = {
         "id": category_id,
-        **category_in.dict(exclude_none=True),
+        **category_in.model_dump(exclude_none=True),
     }
 
     query: str = """

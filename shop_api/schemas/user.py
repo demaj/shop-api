@@ -1,3 +1,4 @@
+from pydantic import ConfigDict
 from pydantic.main import BaseModel
 from pydantic.networks import EmailStr
 
@@ -15,9 +16,7 @@ class UserCreate(UserBase):
 
 class User(UserBase):
     id: int | None = None
-
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class UserInDB(User):

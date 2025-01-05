@@ -35,7 +35,7 @@ app = FastAPI(
     title=settings.PROJECT_TITLE,
     description=settings.PROJECT_DESCRIPTION,
     version=settings.PROJECT_VERSION,
-    openapi_prefix=settings.API_V1_STR,
+    root_path=settings.API_V1_STR,
     lifespan=lifespan,
 )
 

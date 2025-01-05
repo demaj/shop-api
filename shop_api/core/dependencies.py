@@ -26,7 +26,6 @@ async def get_current_user(
     db: AsyncSession = Depends(get_db),
     token: str = Depends(),
 ) -> User:
-    query = "SELECT "
     user = db.get(User)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")

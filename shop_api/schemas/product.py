@@ -2,7 +2,7 @@ from datetime import datetime
 from enum import Enum
 from uuid import UUID, uuid4
 
-from pydantic import BaseModel, Field, HttpUrl, Required, validator
+from pydantic import BaseModel, ConfigDict, Field, HttpUrl, field_validator
 
 
 class ProductStatus(str, Enum):
@@ -28,10 +28,11 @@ class ProductBase(BaseModel):
 
 
 class ProductCreate(ProductBase):
-    name: str = Field(default=Required, title="The name of the `product`", max_length=50)
-    price: float = Field(default=Required, gt=0, description="The price of the `product`")
+    name: str = Field(title="The name of the `product`", max_length=50)
+    price: float = Field(gt=0, description="The price of the `product`")
 
-    @validator("price")
+    @field_validator("price")
+    @classmethod
     def price_check(cls, v):
         return round(v, 2)
 
@@ -39,6 +40,4 @@ class ProductCreate(ProductBase):
 class Product(ProductCreate):
     id: UUID = Field(title="Product ID", default_factory=uuid4)
     description: str
-
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)

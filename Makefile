@@ -21,3 +21,7 @@ clean:
 .PHONY: test
 test:
 	@python -m pytest
+
+.PHONY: freeze
+freeze:
+	@python -m pip freeze > requirements.txt

@@ -1,7 +1,8 @@
 import os
 from functools import lru_cache
 
-from pydantic import BaseSettings, EmailStr
+from pydantic.networks import EmailStr
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
@@ -23,9 +24,7 @@ class Settings(BaseSettings):
 
     FIRST_SUPERUSER: EmailStr = os.getenv("FIRST_SUPERUSER")
     FIRST_SUPERUSER_PASSWORD: str = os.getenv("FIRST_SUPERUSER_PASSWORD")
-
-    class Config:
-        case_sensitive = True
+    model_config = SettingsConfigDict(case_sensitive=True)
 
 
 @lru_cache

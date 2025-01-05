@@ -1,12 +1,11 @@
 from fastapi import Query
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 from schemas.product import ProductStatus
 
 
 class BaseFilter(BaseModel):
-    class Config:
-        use_enum_values = True
+    model_config = ConfigDict(use_enum_values=True)
 
 
 class CategoryFilter(BaseFilter):

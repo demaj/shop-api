@@ -31,8 +31,8 @@ async def read_products(
     """
 
     params: dict[str, Any] = {
-        **filters.dict(exclude_none=True),
-        **pagination.dict(),
+        **filters.model_dump(exclude_none=True),
+        **pagination.model_dump(),
     }
 
     query = "SELECT * FROM products"
@@ -45,8 +45,8 @@ async def read_products(
 
     results = await db.execute(statement=text(query), params=params)
     return {
-        "filters": filters.dict(),
-        "paging": pagination.dict(),
+        "filters": filters.model_dump(),
+        "paging": pagination.model_dump(),
         "results": [result for result in results],
     }
 
@@ -66,7 +66,7 @@ async def create_product(
     """
 
     params: dict[str, Any] = {
-        **product_in.dict(exclude_none=True),
+        **product_in.model_dump(exclude_none=True),
     }
 
     query = """
@@ -129,7 +129,7 @@ async def delete_product(
     """
     Delete a `Product`.
     """
-    params = {**product_id.dict(exclude_none=True)}
+    params = {**product_id.model_dump(exclude_none=True)}
 
     query = "DELETE FROM products WHERE id = :id"
     results = await db.execute(statement=text(query), params=params)

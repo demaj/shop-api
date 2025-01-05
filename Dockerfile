@@ -3,7 +3,7 @@ FROM python:3.12.8-slim-bookworm
 LABEL maintainer="Gentian Demaj <gentiani101@gmail.com>"
 
 # Update system dependencies
-RUN apt-get update
+RUN apt-get update && apt-get -y install libpq-dev gcc
 
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1 \

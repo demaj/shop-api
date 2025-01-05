@@ -5,6 +5,7 @@ Revises:
 Create Date: 2022-10-10 22:55:54.591044
 
 """
+
 import sqlalchemy as sa
 from sqlalchemy.dialects.postgresql import UUID
 
