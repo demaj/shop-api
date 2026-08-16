@@ -15,7 +15,6 @@ services:
       - ./shop_api:/code/shop_api
       - ./tests:/code/tests
       - ./pyproject.toml:/code/pyproject.toml
-      - ./.flake8:/code/.flake8
     env_file:
       - ./.envs/.local/app.secrets.env
     ports:

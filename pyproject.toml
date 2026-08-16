@@ -1,90 +1,71 @@
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
-
 [project]
 name = "shop-api"
-description = 'Shop API'
+version = "0.3.0"
+description = "Shop API"
 readme = "README.md"
 requires-python = ">=3.12"
 license = "MIT"
-keywords = []
 authors = [
   { name = "Gentian Demaj", email = "gentiani101@gmail.com" },
 ]
 classifiers = [
   "Development Status :: 4 - Beta",
-  "Programming Language :: Python",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: Implementation :: CPython",
 ]
-dependencies = []
-dynamic = ["version"]
+dependencies = [
+  "alembic==1.13.3",
+  "argon2-cffi==25.1.0",
+  "asgi-correlation-id==4.3.4",
+  "asyncpg==0.29.0",
+  "email-validator==2.2.0",
+  "fastapi==0.115.2",
+  "pwdlib[argon2]==0.3.1",
+  "pydantic==2.9.2",
+  "pydantic-settings==2.7.1",
+  "PyJWT==2.13.0",
+  "python-multipart==0.0.32",
+  "SQLAlchemy==2.0.36",
+  "uvicorn[standard]==0.32.0",
+]
 
 [project.urls]
-Documentation = "https://github.com/demaj/shop-api#readme"
-Issues = "https://github.com/demaj/shop-api/issues"
 Source = "https://github.com/demaj/shop-api"
 
-[tool.hatch.version]
-path = "shop_api/__about__.py"
-
-[tool.hatch.envs.default]
-dependencies = [
-  "pytest",
-  "pytest-cov",
-]
-[tool.hatch.envs.default.scripts]
-cov = "pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=shop_api --cov=tests {args}"
-no-cov = "cov --no-cov {args}"
-
-[tool.coverage.run]
-branch = true
-parallel = true
-omit = [
-  "shop_api/__about__.py",
+[dependency-groups]
+dev = [
+  "ruff>=0.6.0",
+  "pytest==8.3.3",
+  "pytest-cov==5.0.0",
+  "httpx==0.27.2",
 ]
 
-[tool.coverage.report]
-exclude_lines = [
-  "no cov",
-  "if __name__ == .__main__.:",
-  "if TYPE_CHECKING:",
-]
+[tool.uv]
+# Application, not a library — install dependencies but do not build/install the project.
+package = false
 
-[tool.isort]
-profile = "black"
-line_length = 119
-extend_skip_glob = [
-    ".git",
-    ".venv",
-    ".vscode",
-    ".envs",
-    ".github",
-    ".pytest_cache"
-]
-known_third_party = [
-    "alembic",
-    "fastapi",
-    "httpx",
-    "jwt",
-    "pwdlib",
-    "pydantic",
-    "pytest",
-    "sqlalchemy",
-    "starlette"
-]
-known_local_folder = [
-    "core",
-    "crud",
-    "helpers",
-    "models",
-    "routers",
-    "schemas"
-]
-
-[tool.black]
+[tool.ruff]
 line-length = 119
+target-version = "py312"
+extend-exclude = ["alembic/versions"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "C4"]
+# UP042: ProductStatus(str, Enum) binds to Postgres as text — deliberate, not StrEnum.
+# UP046: CRUDBase keeps explicit Generic[...] rather than PEP 695 type params.
+ignore = ["UP042", "UP046"]
+
+[tool.ruff.lint.per-file-ignores]
+"shop_api/*/__init__.py" = ["F401"]
+"shop_api/core/database.py" = ["F401"]
+
+[tool.ruff.lint.isort]
+# Import root is shop_api/ itself, so these packages are first-party.
+known-first-party = ["core", "crud", "helpers", "models", "routers", "schemas", "main"]
+
+[tool.ruff.lint.flake8-bugbear]
+# FastAPI's Depends/Query/Path/Security are intended as argument defaults (B008).
+extend-immutable-calls = ["fastapi.Depends", "fastapi.Query", "fastapi.Path", "fastapi.Security"]
 
 [tool.pytest.ini_options]
 minversion = "6.0"
@@ -93,4 +74,14 @@ pythonpath = ["shop_api"]
 testpaths = ["tests"]
 markers = [
     "integration: requires a reachable PostgreSQL at DATABASE_URI",
+]
+
+[tool.coverage.run]
+branch = true
+omit = ["shop_api/__about__.py"]
+
+[tool.coverage.report]
+exclude_lines = [
+  "if __name__ == .__main__.:",
+  "if TYPE_CHECKING:",
 ]

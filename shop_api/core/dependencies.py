@@ -10,9 +10,10 @@ from pydantic import ValidationError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 import models
-from .database import AsyncSessionLocal
 from core import security
 from core.config import get_settings
+
+from .database import AsyncSessionLocal
 
 
 async def get_db() -> AsyncGenerator[AsyncSession, None]:

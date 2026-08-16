@@ -1,21 +1,22 @@
 # syntax=docker/dockerfile:1
 
-FROM python:3.12.8-slim-bookworm AS runtime
+FROM ghcr.io/astral-sh/uv:python3.12-bookworm-slim AS runtime
 LABEL maintainer="Gentian Demaj <gentiani101@gmail.com>"
 
-ENV PYTHONDONTWRITEBYTECODE=1 \
+ENV UV_COMPILE_BYTECODE=1 \
+    UV_LINK_MODE=copy \
+    UV_PYTHON_DOWNLOADS=0 \
     PYTHONUNBUFFERED=1 \
-    VIRTUAL_ENV=/opt/venv
-ENV PATH="${VIRTUAL_ENV}/bin:$PATH"
-
-RUN python -m venv ${VIRTUAL_ENV}
+    PATH="/code/.venv/bin:$PATH"
 
 WORKDIR /code
 
-# Requirements first: source edits must not bust the dependency layer cache.
-COPY requirements.txt requirements.txt
-RUN python -m pip install --no-cache-dir --upgrade pip \
- && python -m pip install --no-cache-dir -r requirements.txt
+# Runtime dependencies only, cached on the lockfile + pyproject (package=false, so
+# the project source is not needed here — editing code never busts this layer).
+RUN --mount=type=cache,target=/root/.cache/uv \
+    --mount=type=bind,source=uv.lock,target=uv.lock \
+    --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
+    uv sync --locked --no-dev
 
 COPY shop_api shop_api
 COPY alembic alembic
@@ -24,20 +25,22 @@ COPY scripts scripts
 
 RUN chmod +x scripts/docker-entrypoint.sh \
  && adduser --disabled-password --no-create-home app \
- && chown -R app:app /opt/venv
-
+ && chown -R app:app /code/.venv
 USER app
 EXPOSE 8080
 CMD ["/code/scripts/docker-entrypoint.sh"]
 
 
 FROM runtime AS dev
+# /code is root-owned; give ruff a cache dir the app user can write.
+ENV RUFF_CACHE_DIR=/tmp/ruff-cache
 USER root
-COPY requirements-dev.txt requirements-dev.txt
-RUN python -m pip install --no-cache-dir -r requirements-dev.txt \
- && chown -R app:app /opt/venv
-# pytest ini + pythonpath live here; without it in-container pytest cannot collect.
+# Add the dev group (ruff, pytest, ...) to the same venv, and the pytest config.
+RUN --mount=type=cache,target=/root/.cache/uv \
+    --mount=type=bind,source=uv.lock,target=uv.lock \
+    --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
+    uv sync --locked
 COPY pyproject.toml pyproject.toml
-COPY .flake8 .flake8
 COPY tests tests
+RUN chown -R app:app /code/.venv
 USER app

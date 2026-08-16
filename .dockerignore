@@ -24,3 +24,6 @@ data/
 # Others
 .idea
 .vscode
+
+# Ruff
+.ruff_cache/

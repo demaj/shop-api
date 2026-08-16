@@ -20,7 +20,15 @@ test:
 
 .PHONY: lint
 lint:
-	@docker compose exec -w /code web bash -c "isort --check-only shop_api tests && black --check shop_api tests && flake8 shop_api tests"
+	@docker compose exec -w /code web bash -c "ruff check shop_api tests && ruff format --check shop_api tests"
+
+.PHONY: format
+format:
+	@docker compose exec -w /code web bash -c "ruff check --fix shop_api tests && ruff format shop_api tests"
+
+.PHONY: lock
+lock:
+	@uv lock
 
 .PHONY: shell
 shell:

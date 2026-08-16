@@ -36,8 +36,16 @@ automatically on application startup.
 
 ```bash
 make test          # inside the web container (needs the db service running)
-make lint          # black + isort + flake8
+make lint          # ruff check + ruff format --check
+make format        # ruff auto-fix + format
 ```
+
+### Dependencies
+
+Dependencies are managed with [uv](https://docs.astral.sh/uv/): runtime deps live in
+`pyproject.toml` `[project.dependencies]`, dev tools in `[dependency-groups] dev`, and
+exact versions are pinned in `uv.lock`. After changing a dependency, run `make lock` (or
+`uv lock`) and rebuild. To work locally without Docker: `uv sync` then `uv run pytest`.
 
 ## Authentication
 

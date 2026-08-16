@@ -3,7 +3,7 @@
 Runs without a database — `alembic check` covers the models<->migrations side.
 """
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from uuid import uuid4
 
 import pytest
@@ -55,9 +55,9 @@ def test_create_max_lengths_match_column_lengths(create_model, table) -> None:
         if not isinstance(column_type, String) or column_type.length is None:
             continue
         max_lens = [m.max_length for m in field.metadata if isinstance(m, MaxLen)]
-        assert (
-            max_lens
-        ), f"{create_model.__name__}.{field_name} has no max_length but column is String({column_type.length})"
+        assert max_lens, (
+            f"{create_model.__name__}.{field_name} has no max_length but column is String({column_type.length})"
+        )
         assert max_lens[0] == column_type.length, f"{create_model.__name__}.{field_name}"
 
 
@@ -82,7 +82,7 @@ def test_product_read_validates_orm_instance() -> None:
         price=1999,
         status=ProductStatus.available,
         category_id=uuid4(),
-        created=datetime.now(timezone.utc),
+        created=datetime.now(UTC),
         updated=None,
     )
     read = ProductRead.model_validate(orm_product)
@@ -102,7 +102,7 @@ def test_read_models_require_id() -> None:
                 "price": 1,
                 "status": "available",
                 "category_id": uuid4(),
-                "created": datetime.now(timezone.utc),
+                "created": datetime.now(UTC),
             }
         )
 
@@ -116,7 +116,7 @@ def test_read_models_accept_legacy_rows() -> None:
             "price": 0,
             "status": "sold",
             "category_id": uuid4(),
-            "created": datetime.now(timezone.utc),
+            "created": datetime.now(UTC),
         }
     )
     assert read.price == 0

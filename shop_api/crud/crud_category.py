@@ -4,9 +4,10 @@ from typing import Any
 from sqlalchemy.ext.asyncio import AsyncSession
 
 import models
-from .base import CRUDBase
 from helpers.params import CategoryListParams
 from schemas import CategoryCreate, CategoryUpdate
+
+from .base import CRUDBase
 
 
 class CRUDCategory(CRUDBase[models.Category, CategoryCreate, CategoryUpdate]):

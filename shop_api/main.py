@@ -1,8 +1,8 @@
 import logging
 import time
+from collections.abc import Callable
 from contextlib import asynccontextmanager
 from http import HTTPStatus
-from typing import Callable, Dict
 from uuid import uuid4
 
 from asgi_correlation_id import CorrelationIdMiddleware
@@ -84,7 +84,7 @@ async def log_requests(request: Request, call_next: Callable) -> Response:
 
 
 @app.get("/", summary="Status", status_code=HTTPStatus.OK)
-async def index() -> Dict[str, str]:
+async def index() -> dict[str, str]:
     return {"status": "OK"}
 
 

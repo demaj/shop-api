@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Final
 from uuid import UUID
 
@@ -45,7 +45,7 @@ def create_access_token(subject: str | UUID, expires_delta: timedelta | None = N
     settings = get_settings()
     if expires_delta is None:
         expires_delta = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     payload = {"sub": str(subject), "iat": now, "exp": now + expires_delta}
     return jwt.encode(payload, settings.SECRET_KEY.get_secret_value(), algorithm=settings.ALGORITHM)
 
