@@ -92,11 +92,9 @@ line-length = 119
 
 [tool.pytest.ini_options]
 minversion = "6.0"
-addopts = "-ra -q --color=yes --import-mode=importlib"
-pythonpath = "shop_api"
-testpaths = [
-    "tests",
-    "e2e",
-    "integration",
-    "unit"
+addopts = "-ra -q --color=yes --import-mode=importlib --strict-markers"
+pythonpath = ["shop_api"]
+testpaths = ["tests"]
+markers = [
+    "integration: requires a reachable PostgreSQL at DATABASE_URI",
 ]
