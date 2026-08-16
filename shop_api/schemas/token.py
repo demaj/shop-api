@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class Token(BaseModel):
@@ -7,4 +7,6 @@ class Token(BaseModel):
 
 
 class TokenData(BaseModel):
-    sub: str | None = None
+    model_config = ConfigDict(extra="ignore")
+
+    sub: str
