@@ -26,7 +26,12 @@ class ProductCreate(ProductBase):
 class ProductUpdate(BaseModel):
     name: str | None = Field(default=None, min_length=1, max_length=50)
     description: str | None = Field(default=None, max_length=300)
-    price: int | None = Field(default=None, gt=0, le=2_147_483_647, description="The price of the `product`, in cents")
+    price: int | None = Field(
+        default=None,
+        gt=0,
+        le=2_147_483_647,
+        description="The price of the `product`, in cents",
+    )
     status: ProductStatus | None = None
     category_id: UUID | None = None
 

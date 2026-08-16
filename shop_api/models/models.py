@@ -56,14 +56,10 @@ class Product(Base):
     category_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("categories.id", ondelete="RESTRICT")
     )
-    created: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default=func.now()
-    )
+    created: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     # NULL means "never modified"; raw-SQL updates must set `updated = now()`
     # themselves — onupdate only fires through the ORM.
-    updated: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), onupdate=func.now()
-    )
+    updated: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), onupdate=func.now())
 
     category: Mapped["Category"] = relationship(back_populates="products")
 

@@ -10,4 +10,5 @@ class CategoryPagination(BasePagination):
     limit: int = 10
 
 
-class ProductPagination(BasePagination): ...
+class ProductPagination(BasePagination):
+    pass
