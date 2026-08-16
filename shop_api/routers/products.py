@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 import crud
 import models
 import schemas
-from core.dependencies import get_db
+from core.dependencies import get_current_active_user, get_db
 from helpers.params import ProductListParams
 from helpers.responses import ProductListResponse
 from helpers.tags import Tags
@@ -16,7 +16,11 @@ from helpers.tags import Tags
 # Same prefix, two routers: write_router carries the auth dependency (Phase 3),
 # so the decorator you type determines protection.
 read_router = APIRouter(prefix="/products", tags=[Tags.products])
-write_router = APIRouter(prefix="/products", tags=[Tags.products])
+write_router = APIRouter(
+    prefix="/products",
+    tags=[Tags.products],
+    dependencies=[Depends(get_current_active_user)],
+)
 
 
 @read_router.get(
