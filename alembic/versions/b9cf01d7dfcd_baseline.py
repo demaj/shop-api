@@ -19,15 +19,19 @@ depends_on = None
 
 
 def upgrade() -> None:
+    # Constraint names pinned to what PG auto-generated historically, so this
+    # migration stays deterministic now that env.py wires a naming convention.
     op.create_table(
         "categories",
-        sa.Column("id", UUID(as_uuid=True), primary_key=True, server_default=sa.text("gen_random_uuid()")),
-        sa.Column("name", sa.String(50), unique=True, nullable=False),
+        sa.Column("id", UUID(as_uuid=True), server_default=sa.text("gen_random_uuid()")),
+        sa.Column("name", sa.String(50), nullable=False),
+        sa.PrimaryKeyConstraint("id", name="categories_pkey"),
+        sa.UniqueConstraint("name", name="categories_name_key"),
     )
     op.create_index(op.f("idx_categories_id"), "categories", ["id"], unique=True)
     op.create_table(
         "products",
-        sa.Column("id", UUID(as_uuid=True), primary_key=True, server_default=sa.text("gen_random_uuid()")),
+        sa.Column("id", UUID(as_uuid=True), server_default=sa.text("gen_random_uuid()")),
         sa.Column("name", sa.String(50), nullable=False),
         sa.Column("description", sa.String(), nullable=True),
         sa.Column("price", sa.Float(), nullable=False),
@@ -35,15 +39,17 @@ def upgrade() -> None:
         sa.Column("category_id", UUID(as_uuid=True), nullable=False),
         sa.Column("created", sa.DateTime(), server_default=sa.func.current_timestamp()),
         sa.Column("updated", sa.DateTime(), default=sa.func.now(), onupdate=sa.func.now()),
-        sa.ForeignKeyConstraint(["category_id"], ["categories.id"]),
+        sa.PrimaryKeyConstraint("id", name="products_pkey"),
+        sa.ForeignKeyConstraint(["category_id"], ["categories.id"], name="products_category_id_fkey"),
     )
     op.create_index(op.f("idx_products_id"), "products", ["id"], unique=True)
     op.create_index(op.f("idx_products_price"), "products", ["price"], unique=False)
 
 
 def downgrade() -> None:
-    op.drop_index(op.f("idx_categories_id"), table_name="categories")
-    op.drop_table("categories")
+    # products references categories, so it must go first.
     op.drop_index(op.f("idx_products_id"), table_name="products")
     op.drop_index(op.f("idx_products_price"), table_name="products")
     op.drop_table("products")
+    op.drop_index(op.f("idx_categories_id"), table_name="categories")
+    op.drop_table("categories")
