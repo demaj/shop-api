@@ -30,10 +30,10 @@ jobs:
         run: uv sync --locked --only-group dev
 
       - name: ruff check
-        run: uv run ruff check shop_api tests
+        run: uv run --no-sync ruff check shop_api tests
 
       - name: ruff format
-        run: uv run ruff format --check shop_api tests
+        run: uv run --no-sync ruff format --check shop_api tests
 
   test:
     name: Test
@@ -73,10 +73,10 @@ jobs:
         run: uv sync --locked
 
       - name: Apply migrations
-        run: uv run alembic upgrade head
+        run: uv run --no-sync alembic upgrade head
 
       - name: Check for model/migration drift
-        run: uv run alembic check
+        run: uv run --no-sync alembic check
 
       - name: Run tests
-        run: uv run pytest
+        run: uv run --no-sync pytest
