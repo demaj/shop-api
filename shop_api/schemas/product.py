@@ -4,6 +4,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from .base import PartialUpdate
+
 
 class ProductStatus(str, Enum):
     available = "available"
@@ -23,7 +25,9 @@ class ProductCreate(ProductBase):
     pass
 
 
-class ProductUpdate(BaseModel):
+class ProductUpdate(PartialUpdate):
+    NULLABLE_FIELDS = frozenset({"description"})
+
     name: str | None = Field(default=None, min_length=1, max_length=50)
     description: str | None = Field(default=None, max_length=300)
     price: int | None = Field(

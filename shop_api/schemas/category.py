@@ -2,6 +2,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from .base import PartialUpdate
+
 
 class CategoryBase(BaseModel):
     name: str = Field(
@@ -15,7 +17,7 @@ class CategoryCreate(CategoryBase):
     pass
 
 
-class CategoryUpdate(BaseModel):
+class CategoryUpdate(PartialUpdate):
     name: str | None = Field(default=None, min_length=3, max_length=50)
 
 
