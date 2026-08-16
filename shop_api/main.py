@@ -12,6 +12,7 @@ from starlette.middleware.cors import CORSMiddleware
 from starlette.requests import Request
 from starlette.responses import Response
 
+from core.bootstrap import ensure_first_superuser
 from core.config import Settings, get_settings
 from core.database import async_engine
 from core.errors import integrity_error_handler
@@ -29,6 +30,7 @@ settings: Settings = get_settings()
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("Application started")
+    await ensure_first_superuser()
     yield
     await async_engine.dispose()
     logger.info("Application shutdown")

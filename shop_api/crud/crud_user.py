@@ -2,10 +2,9 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 import models
+from .base import CRUDBase
 from core import security
 from schemas import UserCreate, UserUpdate
-
-from .base import CRUDBase
 
 
 class CRUDUser(CRUDBase[models.User, UserCreate, UserUpdate]):
