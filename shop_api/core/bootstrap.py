@@ -39,4 +39,5 @@ async def ensure_first_superuser() -> None:
         # longer exec into it to run migrations).
         logger.warning("Skipping superuser bootstrap: %s. Run `alembic upgrade head`.", exc)
     except ValidationError as exc:
-        logger.error("FIRST_SUPERUSER / FIRST_SUPERUSER_PASSWORD are invalid: %s", exc)
+        # include_input=False: the error carries the plaintext password otherwise.
+        logger.error("Superuser bootstrap rejected the configured values: %s", exc.errors(include_input=False))

@@ -22,15 +22,5 @@ class CRUDUser(CRUDBase[models.User, UserCreate, UserUpdate]):
         await db.refresh(db_obj)
         return db_obj
 
-    async def authenticate(self, db: AsyncSession, *, email: str, password: str) -> models.User | None:
-        user = await self.get_by_email(db, email=email)
-        if user is None:
-            # Same wall-clock cost as a real verification (anti user-enumeration).
-            await security.verify_dummy_password(password)
-            return None
-        if not await security.verify_password(password, user.hashed_password):
-            return None
-        return user
-
 
 user = CRUDUser(models.User, order_by=(models.User.email.asc(), models.User.id.asc()))

@@ -1,13 +1,18 @@
 from collections.abc import AsyncIterator
+from typing import Annotated
 
 import pytest
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI
+from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.exc import DBAPIError
 from sqlalchemy.ext.asyncio import AsyncConnection, AsyncEngine, AsyncSession, create_async_engine
 from sqlalchemy.pool import NullPool
 
+import crud
+import models
 from core.config import get_settings
 from core.dependencies import get_db
+from routers.auth import login_candidate
 
 
 @pytest.fixture(scope="session")
@@ -43,6 +48,17 @@ def override_db(app: FastAPI, db_connection: AsyncConnection) -> AsyncIterator[N
             async with session.begin():
                 yield session
 
+    async def _login_candidate(
+        form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+    ) -> models.User | None:
+        # login opens its own session in production; here it must read the
+        # rolled-back test transaction, not a fresh pooled connection.
+        async with AsyncSession(
+            bind=db_connection, join_transaction_mode="create_savepoint", expire_on_commit=False
+        ) as session:
+            return await crud.user.get_by_email(session, email=form_data.username)
+
     app.dependency_overrides[get_db] = _get_db
+    app.dependency_overrides[login_candidate] = _login_candidate
     yield
     app.dependency_overrides.clear()

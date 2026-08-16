@@ -133,6 +133,11 @@ async def test_non_superuser_cannot_create_users(async_client: AsyncClient, crea
     assert allowed.status_code == HTTPStatus.CREATED
 
 
+async def test_nul_byte_in_body_is_422_not_500(async_client: AsyncClient, superuser_auth) -> None:
+    response = await async_client.post("/api/v1/categories", json={"name": "a\x00b"}, headers=superuser_auth)
+    assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
+
+
 async def test_list_ordering_is_deterministic(async_client: AsyncClient, superuser_auth) -> None:
     for name in ("Zeta", "Alpha", "Midway"):
         await async_client.post("/api/v1/categories", json={"name": name}, headers=superuser_auth)

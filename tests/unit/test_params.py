@@ -10,7 +10,16 @@ pytestmark = pytest.mark.anyio
 
 @pytest.mark.parametrize(
     "query",
-    ["limit=-1", "limit=0", "limit=101", "offset=-1", "unknown_param=1", "price=-5", "status=bogus"],
+    [
+        "limit=-1",
+        "limit=0",
+        "limit=101",
+        "offset=-1",
+        "offset=9223372036854775808",
+        "unknown_param=1",
+        "price=-5",
+        "status=bogus",
+    ],
 )
 async def test_invalid_params_are_422(async_client: AsyncClient, query: str) -> None:
     # Query validation fails before the handler (and its DB dependency) runs.

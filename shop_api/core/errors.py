@@ -1,7 +1,7 @@
 import logging
 from http import HTTPStatus
 
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import DBAPIError, IntegrityError
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 
@@ -28,6 +28,22 @@ async def integrity_error_handler(request: Request, exc: IntegrityError) -> JSON
         )
         return JSONResponse(status_code=HTTPStatus.CONFLICT, content={"detail": detail})
     logger.exception("Unhandled integrity error")
+    return JSONResponse(
+        status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
+        content={"detail": "Internal Server Error"},
+    )
+
+
+async def dbapi_error_handler(request: Request, exc: DBAPIError) -> JSONResponse:
+    # SQLSTATE class 22 ("data exception", e.g. NUL byte 22021) is a client error, not a 500.
+    sqlstate = getattr(exc.orig, "sqlstate", None) or getattr(exc.orig, "pgcode", None) or ""
+    if sqlstate.startswith("22"):
+        logger.info("Rejected invalid input value (sqlstate %s)", sqlstate)
+        return JSONResponse(
+            status_code=HTTPStatus.UNPROCESSABLE_ENTITY,
+            content={"detail": "Invalid input value"},
+        )
+    logger.exception("Unhandled database error")
     return JSONResponse(
         status_code=HTTPStatus.INTERNAL_SERVER_ERROR,
         content={"detail": "Internal Server Error"},

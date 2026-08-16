@@ -55,6 +55,15 @@ class Settings(BaseSettings):
             raise ValueError("SECRET_KEY must be at least 32 characters (openssl rand -hex 32)")
         return value
 
+    @field_validator("FIRST_SUPERUSER_PASSWORD")
+    @classmethod
+    def superuser_password_matches_user_rules(cls, value: SecretStr) -> SecretStr:
+        # Fail fast at config load (SecretStr repr is masked, so no leak) rather
+        # than starting adminless when the bootstrap's UserCreate rejects it.
+        if not 8 <= len(value.get_secret_value()) <= 128:
+            raise ValueError("FIRST_SUPERUSER_PASSWORD must be between 8 and 128 characters")
+        return value
+
 
 @lru_cache
 def get_settings() -> Settings:
