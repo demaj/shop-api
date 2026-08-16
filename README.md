@@ -60,15 +60,18 @@ users (superusers only). Prices are integers in **cents**.
 
 ## Production
 
-Production runs as a compose override — never standalone:
+Production is a self-contained compose file. Fill in both secret files, then run it
+from the repo root so relative paths resolve correctly:
 
 ```bash
-cp .envs/.local/app.sample.env .envs/.production/app.secrets.env   # then fill in real values
-docker compose -f docker-compose.yml -f docker/production.yml up -d --build
+cp .envs/.production/app.sample.env .envs/.production/app.secrets.env  # SECRET_KEY, superuser, DATABASE_URI
+cp .envs/.production/db.sample.env  .envs/.production/db.secrets.env   # POSTGRES_* (must match DATABASE_URI)
+docker compose --project-directory . -f docker/production.yml up -d --build
 ```
 
 The production entrypoint applies migrations and serves with multiple uvicorn workers
-(`WEB_CONCURRENCY`, default 2). Postgres is not published to the host.
+(`WEB_CONCURRENCY`, default 2). Postgres is not published to the host, and the database
+container never receives the application's `SECRET_KEY` or superuser password.
 
 ### To-Do
 

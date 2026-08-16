@@ -28,4 +28,4 @@ shell:
 
 .PHONY: prod-config
 prod-config:
-	@docker compose -f docker-compose.yml -f docker/production.yml config
+	@docker compose --project-directory . -f docker/production.yml config

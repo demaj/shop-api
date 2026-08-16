@@ -1,22 +1,50 @@
-# Production override — always combine with the base file:
-#   docker compose -f docker-compose.yml -f docker/production.yml up -d --build
+# Self-contained production stack (NOT an override — empty lists do not reset a
+# base service under compose merge, which silently leaks dev mounts/ports/secrets).
+# Run from the repo root so relative paths resolve against it:
+#   docker compose --project-directory . -f docker/production.yml up -d --build
+name: shop-api-prod
+
 services:
   web:
+    container_name: shop-web
     build:
+      context: .
+      dockerfile: ./Dockerfile
       target: runtime
-    entrypoint: ["/code/scripts/docker-entrypoint.sh"]
-    command: []
-    volumes: []
     env_file:
-      - ../.envs/.production/app.secrets.env
+      - ./.envs/.production/app.secrets.env
     ports:
       - "127.0.0.1:8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - postgres_network
+    restart: unless-stopped
 
   db:
-    env_file: []
+    container_name: shop-db
+    image: postgres:17.5
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/pgdata
+    env_file:
+      # Only Postgres credentials — never the app's SECRET_KEY / admin password.
+      - ./.envs/.production/db.secrets.env
     environment:
       PGDATA: /var/lib/postgresql/data/pgdata
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-    ports: []
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - postgres_network
+    restart: unless-stopped
+
+networks:
+  postgres_network:
+    driver: bridge
+
+volumes:
+  postgres_data:
