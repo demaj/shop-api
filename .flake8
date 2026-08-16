@@ -1,12 +1,13 @@
 [flake8]
-ignore = F401
+extend-ignore = E203, W503
+per-file-ignores =
+    shop_api/*/__init__.py: F401
+    shop_api/core/database.py: F401
 max-line-length = 119
 exclude =
     .git,
-    .gitignore,
-    .dockerignore,
     __pycache__,
     .venv,
     .envs,
-    */migrations/*,
+    alembic/versions,
 max-complexity = 10

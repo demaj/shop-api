@@ -13,10 +13,13 @@ from helpers.pagination import ProductPagination
 from helpers.responses import ProductListResponse
 from helpers.tags import Tags
 
-router = APIRouter(prefix="/products", tags=[Tags.products])
+# Same prefix, two routers: write_router carries the auth dependency (Phase 3),
+# so the decorator you type determines protection.
+read_router = APIRouter(prefix="/products", tags=[Tags.products])
+write_router = APIRouter(prefix="/products", tags=[Tags.products])
 
 
-@router.get(
+@read_router.get(
     "",
     response_model=ProductListResponse,
     response_model_exclude_none=True,
@@ -59,7 +62,7 @@ async def read_products(
     }
 
 
-@router.post(
+@write_router.post(
     "",
     response_model=schemas.Product,
     summary="Create a Product",
@@ -91,7 +94,7 @@ async def create_product(
     return dict(result.mappings().first())
 
 
-@router.put(
+@write_router.put(
     "/{product_id}",
     response_model=schemas.Product,
     status_code=HTTPStatus.OK,
@@ -135,7 +138,7 @@ async def update_product(
     return dict(row)
 
 
-@router.get(
+@read_router.get(
     "/{product_id}",
     response_model=schemas.Product,
     status_code=HTTPStatus.OK,
@@ -157,7 +160,7 @@ async def read_product(
     return dict(row)
 
 
-@router.delete(
+@write_router.delete(
     "/{product_id}",
     status_code=HTTPStatus.NO_CONTENT,
 )

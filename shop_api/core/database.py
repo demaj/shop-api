@@ -5,8 +5,8 @@ from .config import get_settings
 
 async_engine: AsyncEngine = create_async_engine(
     get_settings().DATABASE_URI,
-    # connect_args={"check_same_thread": False},  # Add it if you use SQLite
-    echo=False,
+    echo=get_settings().SQL_ECHO,
+    pool_pre_ping=True,
 )
 
 AsyncSessionLocal = async_sessionmaker(

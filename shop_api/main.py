@@ -7,7 +7,6 @@ from uuid import uuid4
 
 from asgi_correlation_id import CorrelationIdMiddleware
 from fastapi import FastAPI
-from fastapi.security import HTTPBasic
 from starlette.middleware.cors import CORSMiddleware
 from starlette.requests import Request
 from starlette.responses import Response
@@ -15,7 +14,7 @@ from starlette.responses import Response
 from core.config import Settings, get_settings
 from core.database import async_engine
 from helpers.constants import CORRELATION_ID
-from routers import categories, products
+from routers.api import api_router
 
 # Logging
 logger = logging.getLogger(__name__)
@@ -37,17 +36,18 @@ app = FastAPI(
     title=settings.PROJECT_TITLE,
     description=settings.PROJECT_DESCRIPTION,
     version=settings.PROJECT_VERSION,
-    root_path=settings.API_V1_STR,
     lifespan=lifespan,
 )
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
-    expose_headers=[CORRELATION_ID],
-)
+if settings.cors_origins:
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=settings.cors_origins,
+        allow_credentials=False,
+        allow_methods=["*"],
+        allow_headers=["*"],
+        expose_headers=[CORRELATION_ID],
+    )
 
 app.add_middleware(
     CorrelationIdMiddleware,
@@ -55,9 +55,6 @@ app.add_middleware(
     update_request_header=True,
     generator=lambda: str(uuid4()),
 )
-
-security = HTTPBasic()
-
 
 @app.middleware("http")
 async def add_process_time_header(request: Request, call_next: Callable) -> Response:
@@ -83,5 +80,4 @@ async def index() -> Dict[str, str]:
     return {"status": "OK"}
 
 
-app.include_router(categories.router)
-app.include_router(products.router)
+app.include_router(api_router)

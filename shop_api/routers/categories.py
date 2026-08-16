@@ -13,10 +13,13 @@ from helpers.pagination import CategoryPagination
 from helpers.responses import CategoryListResponse
 from helpers.tags import Tags
 
-router = APIRouter(prefix="/categories", tags=[Tags.categories])
+# Same prefix, two routers: write_router carries the auth dependency (Phase 3),
+# so the decorator you type determines protection.
+read_router = APIRouter(prefix="/categories", tags=[Tags.categories])
+write_router = APIRouter(prefix="/categories", tags=[Tags.categories])
 
 
-@router.get(
+@read_router.get(
     "",
     response_model=CategoryListResponse,
     response_model_exclude_none=True,
@@ -52,7 +55,7 @@ async def read_categories(
     }
 
 
-@router.post(
+@write_router.post(
     "",
     response_model=schemas.Category,
     summary="Create a Category",
@@ -80,7 +83,7 @@ async def create_category(
     return dict(result.mappings().first())
 
 
-@router.put(
+@write_router.put(
     "/{category_id}",
     response_model=schemas.Category,
     status_code=HTTPStatus.OK,
@@ -119,7 +122,7 @@ async def update_category(
     return dict(row)
 
 
-@router.get(
+@read_router.get(
     "/{category_id}",
     response_model=schemas.Category,
     status_code=HTTPStatus.OK,
@@ -150,7 +153,7 @@ async def read_category(
     return dict(row)
 
 
-@router.delete(
+@write_router.delete(
     "/{category_id}",
     status_code=HTTPStatus.NO_CONTENT,
 )
