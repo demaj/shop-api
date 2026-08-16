@@ -3,14 +3,15 @@ from typing import Annotated, Any
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Path, Query
-from sqlalchemy import text
-from sqlalchemy.ext.asyncio import AsyncSession
 
+import crud
+import models
 import schemas
 from core.dependencies import get_db
 from helpers.params import CategoryListParams
 from helpers.responses import CategoryListResponse
 from helpers.tags import Tags
+from sqlalchemy.ext.asyncio import AsyncSession
 
 # Same prefix, two routers: write_router carries the auth dependency (Phase 3),
 # so the decorator you type determines protection.
@@ -21,7 +22,6 @@ write_router = APIRouter(prefix="/categories", tags=[Tags.categories])
 @read_router.get(
     "",
     response_model=CategoryListResponse,
-    response_model_exclude_none=True,
     status_code=HTTPStatus.OK,
 )
 async def read_categories(
@@ -32,120 +32,75 @@ async def read_categories(
     Retrieve List of `Categories`.
     """
 
-    bind: dict[str, Any] = params.paging()
-
-    query = "SELECT categories.id, categories.name FROM categories"
-
-    if params.name:
-        query += " WHERE name = :name"
-        bind |= {"name": params.name}
-
-    query += " LIMIT :limit OFFSET :offset"
-
-    results = await db.execute(statement=text(query), params=bind)
+    results = await crud.category.get_page(db, params=params)
     return {
         "filters": params.filters(),
         "paging": params.paging(),
-        "results": list(results.mappings()),
+        "results": results,
     }
 
 
 @write_router.post(
     "",
-    response_model=schemas.Category,
+    response_model=schemas.CategoryRead,
     summary="Create a Category",
     status_code=HTTPStatus.CREATED,
 )
 async def create_category(
     category_in: schemas.CategoryCreate,
     db: AsyncSession = Depends(get_db),
-) -> dict[str, Any]:
+) -> models.Category:
     """
     Create a new `Category`.
     """
 
-    params: dict[str, Any] = {
-        **category_in.model_dump(exclude_none=True),
-    }
-
-    query = """
-        INSERT INTO categories(name)
-        VALUES (:name)
-        RETURNING id, name
-    """
-
-    result = await db.execute(statement=text(query), params=params)
-    return dict(result.mappings().first())
+    return await crud.category.create(db, obj_in=category_in)
 
 
 @write_router.put(
     "/{category_id}",
-    response_model=schemas.Category,
+    response_model=schemas.CategoryRead,
     status_code=HTTPStatus.OK,
 )
 async def update_category(
     category_in: schemas.CategoryUpdate,
     category_id: UUID = Path(title="The ID of the `category` to update"),
     db: AsyncSession = Depends(get_db),
-) -> dict[str, Any]:
+) -> models.Category:
     """
     Update a `Category`.
     """
 
-    if category_in.name is None:
+    changes = category_in.changes()
+    if not changes:
         raise HTTPException(
             status_code=HTTPStatus.UNPROCESSABLE_ENTITY,
             detail="No updatable fields provided",
         )
 
-    params: dict[str, Any] = {
-        "id": category_id,
-        "name": category_in.name,
-    }
-
-    query = """
-        UPDATE categories
-        SET name = :name
-        WHERE id = :id
-        RETURNING id, name
-    """
-
-    result = await db.execute(statement=text(query), params=params)
-    row = result.mappings().first()
-    if row is None:
+    category = await crud.category.get(db, category_id)
+    if category is None:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=f"Category {category_id} not found")
-    return dict(row)
+    return await crud.category.update(db, db_obj=category, changes=changes)
 
 
 @read_router.get(
     "/{category_id}",
-    response_model=schemas.Category,
+    response_model=schemas.CategoryRead,
     status_code=HTTPStatus.OK,
 )
 async def read_category(
     category_id: UUID = Path(title="The ID of the `category` to get"),
     db: AsyncSession = Depends(get_db),
-) -> dict[str, Any]:
+) -> models.Category:
     """
     Get `Category` by ID.
     """
 
-    params: dict[str, Any] = {"id": category_id}
-
-    query = """
-        SELECT
-            categories.id,
-            categories.name
-        FROM categories
-        WHERE id = :id
-        LIMIT 1
-    """
-
-    result = await db.execute(statement=text(query), params=params)
-    row = result.mappings().first()
-    if row is None:
+    category = await crud.category.get(db, category_id)
+    if category is None:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=f"Category {category_id} not found")
-    return dict(row)
+    return category
 
 
 @write_router.delete(
@@ -160,10 +115,7 @@ async def delete_category(
     Delete a `Category`.
     """
 
-    params: dict[str, Any] = {"id": category_id}
-
-    query = "DELETE FROM categories WHERE id = :id RETURNING id"
-
-    result = await db.execute(statement=text(query), params=params)
-    if result.first() is None:
+    category = await crud.category.get(db, category_id)
+    if category is None:
         raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=f"Category {category_id} not found")
+    await crud.category.remove(db, db_obj=category)
