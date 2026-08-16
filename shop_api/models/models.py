@@ -33,7 +33,9 @@ class Category(Base):
     )
     name: Mapped[str] = mapped_column(String(50), unique=True)
 
-    products: Mapped[list["Product"]] = relationship(back_populates="category")
+    # passive_deletes="all": never load or null children on delete — the DB's
+    # ON DELETE RESTRICT is the enforcement, surfacing as a FK violation (409).
+    products: Mapped[list["Product"]] = relationship(back_populates="category", passive_deletes="all")
 
     def __repr__(self) -> str:
         return f"Category(id={self.id!r}, name={self.name!r})"

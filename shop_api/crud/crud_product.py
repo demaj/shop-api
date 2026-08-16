@@ -4,10 +4,9 @@ from typing import Any
 from sqlalchemy.ext.asyncio import AsyncSession
 
 import models
+from .base import CRUDBase
 from helpers.params import ProductListParams
 from schemas import ProductCreate, ProductUpdate
-
-from .base import CRUDBase
 
 
 class CRUDProduct(CRUDBase[models.Product, ProductCreate, ProductUpdate]):

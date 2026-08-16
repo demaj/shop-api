@@ -7,12 +7,14 @@ from uuid import uuid4
 
 from asgi_correlation_id import CorrelationIdMiddleware
 from fastapi import FastAPI
+from sqlalchemy.exc import IntegrityError
 from starlette.middleware.cors import CORSMiddleware
 from starlette.requests import Request
 from starlette.responses import Response
 
 from core.config import Settings, get_settings
 from core.database import async_engine
+from core.errors import integrity_error_handler
 from helpers.constants import CORRELATION_ID
 from routers.api import api_router
 
@@ -38,6 +40,8 @@ app = FastAPI(
     version=settings.PROJECT_VERSION,
     lifespan=lifespan,
 )
+
+app.add_exception_handler(IntegrityError, integrity_error_handler)
 
 if settings.cors_origins:
     app.add_middleware(

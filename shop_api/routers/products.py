@@ -3,6 +3,7 @@ from typing import Annotated, Any
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Path, Query
+from sqlalchemy.ext.asyncio import AsyncSession
 
 import crud
 import models
@@ -11,7 +12,6 @@ from core.dependencies import get_db
 from helpers.params import ProductListParams
 from helpers.responses import ProductListResponse
 from helpers.tags import Tags
-from sqlalchemy.ext.asyncio import AsyncSession
 
 # Same prefix, two routers: write_router carries the auth dependency (Phase 3),
 # so the decorator you type determines protection.
