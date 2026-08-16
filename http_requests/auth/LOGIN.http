@@ -1,0 +1,5 @@
+# The `username` form field carries the user's email.
+POST http://127.0.0.1:8080/api/v1/auth/token HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+
+username=admin@example.com&password=<FIRST_SUPERUSER_PASSWORD>
