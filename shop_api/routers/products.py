@@ -1,15 +1,14 @@
 from http import HTTPStatus
-from typing import Any
+from typing import Annotated, Any
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Path
+from fastapi import APIRouter, Depends, HTTPException, Path, Query
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 import schemas
 from core.dependencies import get_db
-from helpers.filters import ProductFilter
-from helpers.pagination import ProductPagination
+from helpers.params import ProductListParams
 from helpers.responses import ProductListResponse
 from helpers.tags import Tags
 
@@ -26,38 +25,37 @@ write_router = APIRouter(prefix="/products", tags=[Tags.products])
     status_code=HTTPStatus.OK,
 )
 async def read_products(
+    params: Annotated[ProductListParams, Query()],
     db: AsyncSession = Depends(get_db),
-    filters: ProductFilter = Depends(),
-    pagination: ProductPagination = Depends(),
 ) -> dict[str, Any]:
     """
     Retrieve List of `Products`.
     """
 
-    params: dict[str, Any] = {**pagination.model_dump()}
+    bind: dict[str, Any] = params.paging()
 
     query = "SELECT * FROM products"
 
     clauses: list[str] = []
-    if filters.name:
+    if params.name:
         clauses.append("name = :name")
-        params |= {"name": filters.name}
-    if filters.price is not None:
+        bind |= {"name": params.name}
+    if params.price is not None:
         clauses.append("price = :price")
-        params |= {"price": filters.price}
-    if filters.status:
+        bind |= {"price": params.price}
+    if params.status:
         clauses.append("status = :status")
-        params |= {"status": filters.status}
+        bind |= {"status": params.status.value}
 
     if clauses:
         query += " WHERE " + " AND ".join(clauses)
 
     query += " LIMIT :limit OFFSET :offset"
 
-    results = await db.execute(statement=text(query), params=params)
+    results = await db.execute(statement=text(query), params=bind)
     return {
-        "filters": filters.model_dump(),
-        "paging": pagination.model_dump(),
+        "filters": params.filters(),
+        "paging": params.paging(),
         "results": list(results.mappings()),
     }
 

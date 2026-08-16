@@ -1,10 +1,9 @@
 from functools import lru_cache
 from typing import Annotated, Any
 
+from __about__ import __version__
 from pydantic import AnyUrl, BeforeValidator, EmailStr, SecretStr, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
-
-from __about__ import __version__
 
 
 def parse_cors(value: Any) -> list[str] | str:

@@ -1,15 +1,14 @@
 from http import HTTPStatus
-from typing import Any
+from typing import Annotated, Any
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Path
+from fastapi import APIRouter, Depends, HTTPException, Path, Query
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 import schemas
 from core.dependencies import get_db
-from helpers.filters import CategoryFilter
-from helpers.pagination import CategoryPagination
+from helpers.params import CategoryListParams
 from helpers.responses import CategoryListResponse
 from helpers.tags import Tags
 
@@ -26,31 +25,27 @@ write_router = APIRouter(prefix="/categories", tags=[Tags.categories])
     status_code=HTTPStatus.OK,
 )
 async def read_categories(
+    params: Annotated[CategoryListParams, Query()],
     db: AsyncSession = Depends(get_db),
-    filters: CategoryFilter = Depends(),
-    pagination: CategoryPagination = Depends(),
 ) -> dict[str, Any]:
     """
     Retrieve List of `Categories`.
     """
 
-    params: dict[str, Any] = {
-        **filters.model_dump(exclude_none=True),
-        **pagination.model_dump(),
-    }
+    bind: dict[str, Any] = params.paging()
 
     query = "SELECT categories.id, categories.name FROM categories"
 
-    if filters.name:
+    if params.name:
         query += " WHERE name = :name"
-        params |= {"name": filters.name}
+        bind |= {"name": params.name}
 
     query += " LIMIT :limit OFFSET :offset"
 
-    results = await db.execute(statement=text(query), params=params)
+    results = await db.execute(statement=text(query), params=bind)
     return {
-        "filters": filters.model_dump(),
-        "paging": pagination.model_dump(),
+        "filters": params.filters(),
+        "paging": params.paging(),
         "results": list(results.mappings()),
     }
 
