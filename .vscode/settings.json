@@ -7,16 +7,28 @@
     "**/cvs": true,
     "**/.DS_Store": true,
     "**/.pytest_cache": true,
+    "**/.ruff_cache": true,
     "**/__pycache__": true
   },
   "search.exclude": {
     "**/.git": true,
-    "**/.venv": true
+    "**/.venv": true,
+    "**/.ruff_cache": true,
+    "**/uv.lock": true
   },
   "python.defaultInterpreterPath": ".venv/bin/python",
   "python.testing.unittestEnabled": false,
   "python.testing.pytestEnabled": true,
   "python.testing.pytestArgs": ["tests"],
-  "python.analysis.extraPaths": ["app", "tests"],
-  "python.autoComplete.extraPaths": ["app", "tests"]
+  "python.analysis.extraPaths": ["shop_api"],
+  "python.autoComplete.extraPaths": ["shop_api"],
+  "ruff.importStrategy": "fromEnvironment",
+  "[python]": {
+    "editor.defaultFormatter": "charliermarsh.ruff",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.fixAll.ruff": "explicit",
+      "source.organizeImports.ruff": "explicit"
+    }
+  }
 }
