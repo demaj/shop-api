@@ -26,13 +26,15 @@ class ProductFilter(BaseFilter):
         min_length=3,
         max_length=50,
     )
-    price: float | None = Query(
+    price: int | None = Query(
         default=None,
+        ge=0,
+        le=2_147_483_647,
         title="Product's price",
-        description="The price of the `Product` you want to get",
+        description="The price of the `Product` you want to get, in cents",
     )
-    available: ProductStatus | None = Query(
-        default=ProductStatus.available,
-        title="Product's availability",
-        description="Is the `Product` currently available",
+    status: ProductStatus | None = Query(
+        default=None,
+        title="Product's status",
+        description="Only return `Products` with this status",
     )

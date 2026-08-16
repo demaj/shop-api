@@ -3,5 +3,9 @@ Content-Type: application/json
 X-Request-Id: f5059eee-7d1c-4e86-91f9-dcc9dc2ac6e2
 
 {
-    "name": "Tea"
+    "name": "Earl Grey",
+    "description": "Loose leaf, 100g",
+    "price": 1999,
+    "status": "available",
+    "category_id": "00000000-0000-0000-0000-000000000000"
 }

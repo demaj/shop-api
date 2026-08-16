@@ -13,6 +13,7 @@ from starlette.requests import Request
 from starlette.responses import Response
 
 from core.config import Settings, get_settings
+from core.database import async_engine
 from helpers.constants import CORRELATION_ID
 from routers import categories, products
 
@@ -28,6 +29,7 @@ settings: Settings = get_settings()
 async def lifespan(app: FastAPI):
     logger.info("Application started")
     yield
+    await async_engine.dispose()
     logger.info("Application shutdown")
 
 

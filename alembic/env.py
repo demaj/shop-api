@@ -1,32 +1,41 @@
 import asyncio
 import os
+import sys
 from logging.config import fileConfig
+from pathlib import Path
 
-from sqlalchemy import engine_from_config, pool
+from sqlalchemy import pool
 from sqlalchemy.engine import Connection
-from sqlalchemy.ext.asyncio import AsyncEngine
+from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from alembic import context
+
+# shop_api/ is the application's import root (models.py does `from core.base import Base`).
+# Done here rather than via prepend_sys_path: alembic.ini is baked into the docker image
+# (not volume-mounted), and ini paths resolve against the process cwd anyway.
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "shop_api"))
+
+from core.base import Base  # noqa: E402
+import models  # noqa: E402,F401  (imported for its side effect: registers tables on Base.metadata)
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
+
+# The database URL comes from the environment, same as the application's
+# settings; the value in alembic.ini is only a fallback.
+if database_uri := os.getenv("DATABASE_URI"):
+    config.set_main_option("sqlalchemy.url", database_uri.replace("%", "%%"))
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-# add your model's MetaData object here
-# for 'autogenerate' support
-# from myapp import mymodel
-# target_metadata = mymodel.Base.metadata
-target_metadata = None
-
-# other values from the config, defined by the needs of env.py,
-# can be acquired:
-# my_important_option = config.get_main_option("my_important_option")
-# ... etc.
+# compare_type defaults to True since alembic 1.12 — no need to pass it.
+# compare_server_default stays off: on Postgres it yields permanent false
+# positives (now() vs CURRENT_TIMESTAMP, 'available' vs 'available'::product_status).
+target_metadata = Base.metadata
 
 
 def run_migrations_offline() -> None:
@@ -41,7 +50,7 @@ def run_migrations_offline() -> None:
     script output.
 
     """
-    url = os.getenv("DATABASE_URI")
+    url = config.get_main_option("sqlalchemy.url")
     context.configure(
         url=url,
         target_metadata=target_metadata,
@@ -67,13 +76,10 @@ async def run_migrations_online() -> None:
     and associate a connection with the context.
 
     """
-    connectable = AsyncEngine(
-        engine_from_config(
-            config.get_section(config.config_ini_section),
-            prefix="sqlalchemy.",
-            poolclass=pool.NullPool,
-            future=True,
-        )
+    connectable = async_engine_from_config(
+        config.get_section(config.config_ini_section, {}),
+        prefix="sqlalchemy.",
+        poolclass=pool.NullPool,
     )
 
     async with connectable.connect() as connection:

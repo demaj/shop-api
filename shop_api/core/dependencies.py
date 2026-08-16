@@ -1,25 +1,18 @@
-from typing import AsyncGenerator
+from collections.abc import AsyncGenerator
 
 from fastapi import Depends, HTTPException
-from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from .database import AsyncSessionLocal, async_engine
+from .database import AsyncSessionLocal
 from schemas import User
 
 
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
-    async_session = AsyncSessionLocal()
-    try:
-        async with async_session.begin():
-            yield async_session
-        await async_session.commit()
-    except SQLAlchemyError as exc:
-        await async_session.rollback()
-        raise exc
-    finally:
-        await async_session.close()
-        await async_engine.dispose()
+    # Transaction per request: the routers issue raw INSERT/UPDATE statements
+    # without committing, relying on this commit-on-success / rollback-on-error.
+    async with AsyncSessionLocal() as session:
+        async with session.begin():
+            yield session
 
 
 async def get_current_user(

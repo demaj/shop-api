@@ -1,7 +1,8 @@
 from http import HTTPStatus
 from typing import Any
+from uuid import UUID
 
-from fastapi import APIRouter, Depends, Path
+from fastapi import APIRouter, Depends, HTTPException, Path
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -16,7 +17,7 @@ router = APIRouter(prefix="/categories", tags=[Tags.categories])
 
 
 @router.get(
-    "/",
+    "",
     response_model=CategoryListResponse,
     response_model_exclude_none=True,
     status_code=HTTPStatus.OK,
@@ -47,12 +48,12 @@ async def read_categories(
     return {
         "filters": filters.model_dump(),
         "paging": pagination.model_dump(),
-        "results": [result for result in results],
+        "results": list(results.mappings()),
     }
 
 
 @router.post(
-    "/",
+    "",
     response_model=schemas.Category,
     summary="Create a Category",
     status_code=HTTPStatus.CREATED,
@@ -60,7 +61,7 @@ async def read_categories(
 async def create_category(
     category_in: schemas.CategoryCreate,
     db: AsyncSession = Depends(get_db),
-) -> schemas.Category:
+) -> dict[str, Any]:
     """
     Create a new `Category`.
     """
@@ -72,11 +73,11 @@ async def create_category(
     query = """
         INSERT INTO categories(name)
         VALUES (:name)
-        RETURNING id
+        RETURNING id, name
     """
 
-    category_id = await db.execute(statement=text(query), params=params) or None
-    return params | {**category_id.first()}
+    result = await db.execute(statement=text(query), params=params)
+    return dict(result.mappings().first())
 
 
 @router.put(
@@ -85,27 +86,37 @@ async def create_category(
     status_code=HTTPStatus.OK,
 )
 async def update_category(
-    category_in: schemas.CategoryBase,
-    category_id: str = Path(title="The ID of the `category` to update"),
+    category_in: schemas.CategoryUpdate,
+    category_id: UUID = Path(title="The ID of the `category` to update"),
     db: AsyncSession = Depends(get_db),
 ) -> dict[str, Any]:
     """
     Update a `Category`.
     """
 
+    if category_in.name is None:
+        raise HTTPException(
+            status_code=HTTPStatus.UNPROCESSABLE_ENTITY,
+            detail="No updatable fields provided",
+        )
+
     params: dict[str, Any] = {
         "id": category_id,
-        **category_in.model_dump(exclude_none=True),
+        "name": category_in.name,
     }
 
-    query: str = """
+    query = """
         UPDATE categories
         SET name = :name
         WHERE id = :id
+        RETURNING id, name
     """
 
-    await db.execute(statement=query, params=params)
-    return params
+    result = await db.execute(statement=text(query), params=params)
+    row = result.mappings().first()
+    if row is None:
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=f"Category {category_id} not found")
+    return dict(row)
 
 
 @router.get(
@@ -114,14 +125,14 @@ async def update_category(
     status_code=HTTPStatus.OK,
 )
 async def read_category(
-    category_id: str = Path(title="The ID of the `category` to get"),
+    category_id: UUID = Path(title="The ID of the `category` to get"),
     db: AsyncSession = Depends(get_db),
 ) -> dict[str, Any]:
     """
     Get `Category` by ID.
     """
 
-    params: dict[str, str] = {"id": category_id}
+    params: dict[str, Any] = {"id": category_id}
 
     query = """
         SELECT
@@ -132,8 +143,11 @@ async def read_category(
         LIMIT 1
     """
 
-    results = await db.execute(statement=text(query), params=params) or None
-    return results.first()
+    result = await db.execute(statement=text(query), params=params)
+    row = result.mappings().first()
+    if row is None:
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=f"Category {category_id} not found")
+    return dict(row)
 
 
 @router.delete(
@@ -141,15 +155,17 @@ async def read_category(
     status_code=HTTPStatus.NO_CONTENT,
 )
 async def delete_category(
-    category_id: str = Path(title="The ID of the `category` to delete"),
+    category_id: UUID = Path(title="The ID of the `category` to delete"),
     db: AsyncSession = Depends(get_db),
 ) -> None:
     """
     Delete a `Category`.
     """
 
-    params: dict[str, str] = {"id": category_id}
+    params: dict[str, Any] = {"id": category_id}
 
-    query = "DELETE FROM categories WHERE id=:id RETURNING id"
+    query = "DELETE FROM categories WHERE id = :id RETURNING id"
 
-    await db.execute(statement=text(query), params=params)
+    result = await db.execute(statement=text(query), params=params)
+    if result.first() is None:
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=f"Category {category_id} not found")
