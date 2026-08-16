@@ -1,6 +1,11 @@
-#! /usr/bin/env bash
+#!/usr/bin/env bash
+set -euo pipefail
 
 alembic upgrade head
+
 cd /code/shop_api
-gunicorn main:app --workers 2 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:8080
-gunicorn -k uvicorn.workers.UvicornWorker -w 1 --bind 0.0.0.0:8080 --bind 0.0.0.0:8080
+# exec: uvicorn becomes PID 1 so container signals reach the server.
+exec uvicorn main:app \
+  --host 0.0.0.0 \
+  --port "${PORT:-8080}" \
+  --workers "${WEB_CONCURRENCY:-2}"

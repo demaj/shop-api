@@ -11,6 +11,10 @@ __pycache__/
 .venv/
 venv/
 
+# Secrets — must never enter the build context
+.envs/
+*.secrets.env
+
 # Local PostgreSQL data
 data/
 

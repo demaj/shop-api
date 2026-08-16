@@ -1,40 +1,43 @@
-# Pull official base image
-FROM python:3.12.8-slim-bookworm
+# syntax=docker/dockerfile:1
+
+FROM python:3.12.8-slim-bookworm AS runtime
 LABEL maintainer="Gentian Demaj <gentiani101@gmail.com>"
 
-# Update system dependencies
-RUN apt-get update && apt-get -y install libpq-dev gcc
-
-# Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     VIRTUAL_ENV=/opt/venv
-
-# Add python to PATH
 ENV PATH="${VIRTUAL_ENV}/bin:$PATH"
 
-# Create python virtual environment
 RUN python -m venv ${VIRTUAL_ENV}
 
-# Set work directory
 WORKDIR /code
 
-# Copy project and requirements
+# Requirements first: source edits must not bust the dependency layer cache.
 COPY requirements.txt requirements.txt
+RUN python -m pip install --no-cache-dir --upgrade pip \
+ && python -m pip install --no-cache-dir -r requirements.txt
+
 COPY shop_api shop_api
-COPY tests tests
-COPY scripts scripts
 COPY alembic alembic
 COPY alembic.ini alembic.ini
+COPY scripts scripts
 
-# Install dependencies
-RUN python -m pip install --no-cache-dir --upgrade pip && \
-    python -m pip install -r requirements.txt && \
-    adduser --disabled-password --no-create-home app && \
-    chown -R app:app /opt/venv
+RUN chmod +x scripts/docker-entrypoint.sh \
+ && adduser --disabled-password --no-create-home app \
+ && chown -R app:app /opt/venv
 
-# Use newly created user
 USER app
+EXPOSE 8080
+CMD ["/code/scripts/docker-entrypoint.sh"]
 
-# Sanity check
-RUN python --version
+
+FROM runtime AS dev
+USER root
+COPY requirements-dev.txt requirements-dev.txt
+RUN python -m pip install --no-cache-dir -r requirements-dev.txt \
+ && chown -R app:app /opt/venv
+# pytest ini + pythonpath live here; without it in-container pytest cannot collect.
+COPY pyproject.toml pyproject.toml
+COPY .flake8 .flake8
+COPY tests tests
+USER app

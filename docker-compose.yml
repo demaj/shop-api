@@ -6,6 +6,7 @@ services:
     build:
       context: .
       dockerfile: ./Dockerfile
+      target: dev
     entrypoint: bash
     command: >
       -c "cd /code/shop_api && uvicorn main:app --reload --host=0.0.0.0 --port=8080"
@@ -13,12 +14,15 @@ services:
       - ./alembic:/code/alembic
       - ./shop_api:/code/shop_api
       - ./tests:/code/tests
+      - ./pyproject.toml:/code/pyproject.toml
+      - ./.flake8:/code/.flake8
     env_file:
       - ./.envs/.local/app.secrets.env
     ports:
       - "8080:8080"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     networks:
       - postgres_network
     restart: unless-stopped
@@ -33,7 +37,13 @@ services:
     environment:
       PGDATA: /var/lib/postgresql/data/pgdata
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
     networks:
       - postgres_network
     restart: unless-stopped

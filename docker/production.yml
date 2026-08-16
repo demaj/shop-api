@@ -1,46 +1,22 @@
-version: '3.9'
-
+# Production override — always combine with the base file:
+#   docker compose -f docker-compose.yml -f docker/production.yml up -d --build
 services:
   web:
-    container_name: shop-web
     build:
-      context: .
-      dockerfile: ./Dockerfile
-    entrypoint: bash
-    command: >
-      -c "cd /code/shop_api && uvicorn main:app --reload --host=0.0.0.0 --port=8080"
-    volumes:
-      - ./alembic:/code/alembic
-      - ./shop_api:/code/shop_api
-      - ./tests:/code/tests
+      target: runtime
+    entrypoint: ["/code/scripts/docker-entrypoint.sh"]
+    command: []
+    volumes: []
     env_file:
-      - ./.envs/.production/app.secrets.env
+      - ../.envs/.production/app.secrets.env
     ports:
-      - "8080:8080"
-    depends_on:
-      - db
-    networks:
-      - postgres_network
-    restart: unless-stopped
+      - "127.0.0.1:8080:8080"
 
   db:
-    container_name: shop-db
-    image: postgres:17.5
-    volumes:
-      - postgres_data:/var/lib/postgresql/data/pgdata
-    env_file:
-      - ./.envs/.production/app.secrets.env
+    env_file: []
     environment:
       PGDATA: /var/lib/postgresql/data/pgdata
-    ports:
-      - "5432:5432"
-    networks:
-      - postgres_network
-    restart: unless-stopped
-
-networks:
-  postgres_network:
-    driver: bridge
-
-volumes:
-  postgres_data:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports: []

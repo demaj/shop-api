@@ -6,22 +6,17 @@ build-backend = "hatchling.build"
 name = "shop-api"
 description = 'Shop API'
 readme = "README.md"
-requires-python = ">=3.7"
+requires-python = ">=3.12"
 license = "MIT"
 keywords = []
 authors = [
-  { name = "Gentian Demaj", email = "gentiai101@gmail.com" },
+  { name = "Gentian Demaj", email = "gentiani101@gmail.com" },
 ]
 classifiers = [
   "Development Status :: 4 - Beta",
   "Programming Language :: Python",
-  "Programming Language :: Python :: 3.7",
-  "Programming Language :: Python :: 3.8",
-  "Programming Language :: Python :: 3.9",
-  "Programming Language :: Python :: 3.10",
-  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: Implementation :: CPython",
-  "Programming Language :: Python :: Implementation :: PyPy",
 ]
 dependencies = []
 dynamic = ["version"]
@@ -42,9 +37,6 @@ dependencies = [
 [tool.hatch.envs.default.scripts]
 cov = "pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=shop_api --cov=tests {args}"
 no-cov = "cov --no-cov {args}"
-
-[[tool.hatch.envs.test.matrix]]
-python = ["37", "38", "39", "310", "311"]
 
 [tool.coverage.run]
 branch = true
@@ -72,11 +64,15 @@ extend_skip_glob = [
     ".pytest_cache"
 ]
 known_third_party = [
+    "alembic",
     "fastapi",
-    "starlette",
+    "httpx",
+    "jwt",
+    "pwdlib",
+    "pydantic",
+    "pytest",
     "sqlalchemy",
-    "databases",
-    "pytest"
+    "starlette"
 ]
 known_local_folder = [
     "core",

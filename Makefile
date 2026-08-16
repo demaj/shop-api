@@ -8,20 +8,24 @@ stop:
 
 .PHONY: migrate
 migrate:
-	@docker compose exec web alembic upgrade head
+	@docker compose exec -w /code web alembic upgrade head
 
 .PHONY: logs
 logs:
 	@docker logs -f shop-web
 
-.PHONY: clean
-clean:
-	@docker system prune --volumes --all --force
-
 .PHONY: test
 test:
-	@python -m pytest
+	@docker compose exec -w /code web python -m pytest
 
-.PHONY: freeze
-freeze:
-	@python -m pip freeze > requirements.txt
+.PHONY: lint
+lint:
+	@docker compose exec -w /code web bash -c "isort --check-only shop_api tests && black --check shop_api tests && flake8 shop_api tests"
+
+.PHONY: shell
+shell:
+	@docker compose exec -w /code web bash
+
+.PHONY: prod-config
+prod-config:
+	@docker compose -f docker-compose.yml -f docker/production.yml config
