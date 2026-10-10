@@ -16,7 +16,7 @@ logs:
 
 .PHONY: test
 test:
-	@docker compose exec -e TESTS_REQUIRE_DB=1 -w /code web python -m pytest
+	@docker compose exec -e TESTS_REQUIRE_DB=1 -e COVERAGE_FILE=/tmp/.coverage -w /code web python -m pytest --cov --cov-fail-under=80
 
 .PHONY: lint
 lint:

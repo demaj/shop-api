@@ -78,9 +78,13 @@ markers = [
 
 [tool.coverage.run]
 branch = true
+source = ["shop_api"]
+concurrency = ["greenlet", "thread"]
 omit = ["shop_api/__about__.py"]
 
 [tool.coverage.report]
+show_missing = true
+skip_covered = true
 exclude_lines = [
   "if __name__ == .__main__.:",
   "if TYPE_CHECKING:",
