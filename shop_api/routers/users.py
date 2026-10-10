@@ -1,11 +1,12 @@
 from http import HTTPStatus
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 
 import crud
 import models
 import schemas
 from core.dependencies import CurrentActiveUser, SessionDep, get_current_active_superuser
+from core.errors import ApiError, ErrorCode
 from helpers.tags import Tags
 
 router = APIRouter(prefix="/users", tags=[Tags.users])
@@ -32,8 +33,5 @@ async def create_user(db: SessionDep, user_in: schemas.UserCreate) -> models.Use
     """
 
     if await crud.user.get_by_email(db, email=user_in.email) is not None:
-        raise HTTPException(
-            status_code=HTTPStatus.CONFLICT,
-            detail="A user with this email already exists",
-        )
+        raise ApiError(ErrorCode.already_exists, "A user with this email already exists")
     return await crud.user.create(db, obj_in=user_in)

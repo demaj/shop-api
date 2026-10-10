@@ -1,10 +1,9 @@
 from collections.abc import AsyncGenerator
-from http import HTTPStatus
 from typing import Annotated
 from uuid import UUID
 
 import jwt
-from fastapi import Depends, HTTPException
+from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer
 from pydantic import ValidationError
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -12,6 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 import models
 from core import security
 from core.config import get_settings
+from core.errors import ApiError, ErrorCode
 
 from .database import AsyncSessionLocal
 
@@ -32,9 +32,9 @@ TokenDep = Annotated[str, Depends(oauth2_scheme)]
 
 
 async def get_current_user(db: SessionDep, token: TokenDep) -> models.User:
-    credentials_exception = HTTPException(
-        status_code=HTTPStatus.UNAUTHORIZED,
-        detail="Could not validate credentials",
+    credentials_exception = ApiError(
+        ErrorCode.unauthenticated,
+        "Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
@@ -54,7 +54,7 @@ CurrentUser = Annotated[models.User, Depends(get_current_user)]
 
 async def get_current_active_user(current_user: CurrentUser) -> models.User:
     if not current_user.is_active:
-        raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail="Inactive user")
+        raise ApiError(ErrorCode.account_inactive, "Inactive user")
     return current_user
 
 
@@ -63,10 +63,7 @@ CurrentActiveUser = Annotated[models.User, Depends(get_current_active_user)]
 
 async def get_current_active_superuser(current_user: CurrentActiveUser) -> models.User:
     if not current_user.is_superuser:
-        raise HTTPException(
-            status_code=HTTPStatus.FORBIDDEN,
-            detail="The user doesn't have enough privileges",
-        )
+        raise ApiError(ErrorCode.forbidden, "The user doesn't have enough privileges")
     return current_user
 
 

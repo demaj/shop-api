@@ -96,6 +96,7 @@ async def test_duplicate_category_name_is_409(async_client: AsyncClient, superus
     await async_client.post("/api/v1/categories", json={"name": "Tea"}, headers=superuser_auth)
     duplicate = await async_client.post("/api/v1/categories", json={"name": "Tea"}, headers=superuser_auth)
     assert duplicate.status_code == HTTPStatus.CONFLICT
+    assert duplicate.json()["code"] == "already_exists"
 
 
 async def test_unknown_category_fk_is_409(async_client: AsyncClient, superuser_auth) -> None:
@@ -105,6 +106,7 @@ async def test_unknown_category_fk_is_409(async_client: AsyncClient, superuser_a
         headers=superuser_auth,
     )
     assert response.status_code == HTTPStatus.CONFLICT
+    assert response.json()["code"] == "reference_not_found"
 
 
 async def test_delete_referenced_category_is_409(async_client: AsyncClient, superuser_auth) -> None:
@@ -117,6 +119,7 @@ async def test_delete_referenced_category_is_409(async_client: AsyncClient, supe
     )
     response = await async_client.delete(f"/api/v1/categories/{category_id}", headers=superuser_auth)
     assert response.status_code == HTTPStatus.CONFLICT
+    assert response.json()["code"] == "resource_in_use"
 
 
 async def test_non_superuser_cannot_create_users(async_client: AsyncClient, create_user, login) -> None:
@@ -136,6 +139,7 @@ async def test_non_superuser_cannot_create_users(async_client: AsyncClient, crea
 async def test_nul_byte_in_body_is_422_not_500(async_client: AsyncClient, superuser_auth) -> None:
     response = await async_client.post("/api/v1/categories", json={"name": "a\x00b"}, headers=superuser_auth)
     assert response.status_code == HTTPStatus.UNPROCESSABLE_ENTITY
+    assert response.json()["code"] == "validation_failed"
 
 
 async def test_list_ordering_is_deterministic(async_client: AsyncClient, superuser_auth) -> None:

@@ -1,21 +1,22 @@
 import logging
-import time
-from collections.abc import Callable
 from contextlib import asynccontextmanager
 from http import HTTPStatus
 from uuid import uuid4
 
-from asgi_correlation_id import CorrelationIdMiddleware, correlation_id
+from asgi_correlation_id import CorrelationIdFilter, CorrelationIdMiddleware
 from fastapi import FastAPI
-from sqlalchemy.exc import DBAPIError, IntegrityError
+from fastapi.exceptions import RequestValidationError
+from starlette.exceptions import HTTPException
+from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.middleware.cors import CORSMiddleware
-from starlette.requests import Request
-from starlette.responses import Response
 
 from core.bootstrap import ensure_first_superuser
 from core.config import Settings, get_settings
 from core.database import async_engine
-from core.errors import dbapi_error_handler, integrity_error_handler
+from core.errors import ApiError
+from core.exception_handlers import api_error_handler, http_exception_handler, validation_exception_handler
+from core.middleware import ProblemMiddleware, add_process_time_header, log_requests
+from core.openapi import PROBLEM_RESPONSES, add_problem_schemas
 from helpers.constants import CORRELATION_ID
 from routers.api import api_router
 
@@ -28,8 +29,10 @@ settings: Settings = get_settings()
 
 
 def configure_logging() -> None:
-    # Without a root handler, app logs propagate to lastResort and are dropped below WARNING.
-    logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(name)s: %(message)s", force=True)
+    handler = logging.StreamHandler()
+    handler.addFilter(CorrelationIdFilter(default_value="-"))
+    handler.setFormatter(logging.Formatter("%(levelname)s: %(name)s: [%(correlation_id)s] %(message)s"))
+    logging.basicConfig(level=logging.INFO, handlers=[handler], force=True)
 
 
 @asynccontextmanager
@@ -47,30 +50,17 @@ app = FastAPI(
     description=settings.PROJECT_DESCRIPTION,
     version=settings.PROJECT_VERSION,
     lifespan=lifespan,
+    responses=PROBLEM_RESPONSES,
 )
+add_problem_schemas(app)
 
-app.add_exception_handler(IntegrityError, integrity_error_handler)
-app.add_exception_handler(DBAPIError, dbapi_error_handler)
+app.add_exception_handler(ApiError, api_error_handler)
+app.add_exception_handler(HTTPException, http_exception_handler)
+app.add_exception_handler(RequestValidationError, validation_exception_handler)
 
-
-# Registered inner-to-outer (add_middleware prepends): CorrelationId runs before log_requests reads the id.
-@app.middleware("http")
-async def add_process_time_header(request: Request, call_next: Callable) -> Response:
-    start_time = time.time()
-    response: Response = await call_next(request)
-    process_time = time.time() - start_time
-    response.headers["X-Process-Time"] = str(process_time)
-    return response
-
-
-@app.middleware("http")
-async def log_requests(request: Request, call_next: Callable) -> Response:
-    logger.info("Incoming request: %s", correlation_id.get())
-    response: Response = await call_next(request)
-    logger.info("Outgoing response: %s", correlation_id.get())
-    return response
-
-
+app.add_middleware(ProblemMiddleware)
+app.add_middleware(BaseHTTPMiddleware, dispatch=add_process_time_header)
+app.add_middleware(BaseHTTPMiddleware, dispatch=log_requests)
 app.add_middleware(
     CorrelationIdMiddleware,
     header_name="X-Request-Id",

@@ -1,13 +1,13 @@
-from http import HTTPStatus
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from fastapi.security import OAuth2PasswordRequestForm
 
 import crud
 import models
 from core import security
 from core.database import AsyncSessionLocal
+from core.errors import ApiError, ErrorCode
 from helpers.tags import Tags
 from schemas import Token
 
@@ -32,9 +32,9 @@ async def login_access_token(
     OAuth2-compatible token login: the `username` form field carries the user's email.
     """
 
-    unauthorized = HTTPException(
-        status_code=HTTPStatus.UNAUTHORIZED,
-        detail="Incorrect username or password",
+    unauthorized = ApiError(
+        ErrorCode.invalid_credentials,
+        "Incorrect username or password",
         headers={"WWW-Authenticate": "Bearer"},
     )
     if user is None:
@@ -44,5 +44,5 @@ async def login_access_token(
     if not await security.verify_password(form_data.password, user.hashed_password):
         raise unauthorized
     if not user.is_active:
-        raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail="Inactive user")
+        raise unauthorized
     return Token(access_token=security.create_access_token(user.id), token_type="bearer")

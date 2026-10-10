@@ -2,13 +2,14 @@ from http import HTTPStatus
 from typing import Annotated, Any
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Path, Query
+from fastapi import APIRouter, Depends, Path, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 import crud
 import models
 import schemas
 from core.dependencies import get_current_active_user, get_db
+from core.errors import ApiError, ErrorCode
 from helpers.params import CategoryListParams
 from helpers.responses import CategoryListResponse
 from helpers.tags import Tags
@@ -77,14 +78,11 @@ async def update_category(
 
     changes = category_in.changes()
     if not changes:
-        raise HTTPException(
-            status_code=HTTPStatus.UNPROCESSABLE_ENTITY,
-            detail="No updatable fields provided",
-        )
+        raise ApiError(ErrorCode.validation_failed, "No updatable fields provided")
 
     category = await crud.category.get(db, category_id)
     if category is None:
-        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=f"Category {category_id} not found")
+        raise ApiError(ErrorCode.resource_not_found, f"Category {category_id} not found")
     return await crud.category.update(db, db_obj=category, changes=changes)
 
 
@@ -103,7 +101,7 @@ async def read_category(
 
     category = await crud.category.get(db, category_id)
     if category is None:
-        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=f"Category {category_id} not found")
+        raise ApiError(ErrorCode.resource_not_found, f"Category {category_id} not found")
     return category
 
 
@@ -121,5 +119,5 @@ async def delete_category(
 
     category = await crud.category.get(db, category_id)
     if category is None:
-        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=f"Category {category_id} not found")
+        raise ApiError(ErrorCode.resource_not_found, f"Category {category_id} not found")
     await crud.category.remove(db, db_obj=category)

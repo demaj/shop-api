@@ -10,6 +10,7 @@ os.environ.setdefault("SECRET_KEY", "0123456789abcdef" * 4)
 os.environ.setdefault("DATABASE_URI", "postgresql+asyncpg://shop:shop@localhost:5432/shop_test")
 os.environ.setdefault("FIRST_SUPERUSER", "admin@example.com")
 os.environ.setdefault("FIRST_SUPERUSER_PASSWORD", "change-this-password")
+os.environ.setdefault("BACKEND_CORS_ORIGINS", "http://client.test")
 
 BASE_URL = "http://api.shop.com"
 
