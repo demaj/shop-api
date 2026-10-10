@@ -59,6 +59,7 @@ jobs:
       SECRET_KEY: 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
       FIRST_SUPERUSER: admin@example.com
       FIRST_SUPERUSER_PASSWORD: change-this-password
+      TESTS_REQUIRE_DB: "1"
 
     steps:
       - name: Checkout repo

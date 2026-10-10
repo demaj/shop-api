@@ -1,7 +1,9 @@
+import os
 from collections.abc import AsyncIterator
 from typing import Annotated
 
 import pytest
+from asyncpg import PostgresError
 from fastapi import Depends, FastAPI
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.exc import DBAPIError
@@ -21,15 +23,17 @@ async def engine() -> AsyncIterator[AsyncEngine]:
     try:
         async with engine.connect():
             pass
-    except (OSError, DBAPIError) as exc:
-        pytest.skip(f"PostgreSQL not reachable at DATABASE_URI: {exc}")
+    except (OSError, DBAPIError, PostgresError) as exc:
+        message = f"PostgreSQL not reachable at DATABASE_URI: {exc}"
+        if os.environ.get("TESTS_REQUIRE_DB") == "1":
+            pytest.fail(message)
+        pytest.skip(message)
     yield engine
     await engine.dispose()
 
 
 @pytest.fixture
 async def db_connection(engine: AsyncEngine) -> AsyncIterator[AsyncConnection]:
-    # One outer transaction per test, always rolled back — no cross-test bleed.
     async with engine.connect() as connection:
         transaction = await connection.begin()
         yield connection
@@ -44,15 +48,12 @@ def override_db(app: FastAPI, db_connection: AsyncConnection) -> AsyncIterator[N
             join_transaction_mode="create_savepoint",
             expire_on_commit=False,
         ) as session:
-            # Mirrors production commit-on-success; the "commit" releases a savepoint.
             async with session.begin():
                 yield session
 
     async def _login_candidate(
         form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     ) -> models.User | None:
-        # login opens its own session in production; here it must read the
-        # rolled-back test transaction, not a fresh pooled connection.
         async with AsyncSession(
             bind=db_connection, join_transaction_mode="create_savepoint", expire_on_commit=False
         ) as session:

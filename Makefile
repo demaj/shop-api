@@ -16,7 +16,7 @@ logs:
 
 .PHONY: test
 test:
-	@docker compose exec -w /code web python -m pytest
+	@docker compose exec -e TESTS_REQUIRE_DB=1 -w /code web python -m pytest
 
 .PHONY: lint
 lint:
