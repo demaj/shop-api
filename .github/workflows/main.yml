@@ -30,10 +30,10 @@ jobs:
         run: uv sync --locked --only-group dev
 
       - name: ruff check
-        run: uv run --no-sync ruff check shop_api tests
+        run: uv run --no-sync ruff check .
 
       - name: ruff format
-        run: uv run --no-sync ruff format --check shop_api tests
+        run: uv run --no-sync ruff format --check .
 
   test:
     name: Test

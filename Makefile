@@ -20,11 +20,11 @@ test:
 
 .PHONY: lint
 lint:
-	@docker compose exec -w /code web bash -c "ruff check shop_api tests && ruff format --check shop_api tests"
+	@docker compose exec -w /code web bash -c "ruff check . && ruff format --check ."
 
 .PHONY: format
 format:
-	@docker compose exec -w /code web bash -c "ruff check --fix shop_api tests && ruff format shop_api tests"
+	@docker compose exec -w /code web bash -c "ruff check --fix . && ruff format ."
 
 .PHONY: lock
 lock:

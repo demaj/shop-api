@@ -15,8 +15,8 @@ from alembic import context
 # (not volume-mounted), and ini paths resolve against the process cwd anyway.
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "shop_api"))
 
-from core.base import Base  # noqa: E402
 import models  # noqa: E402,F401  (imported for its side effect: registers tables on Base.metadata)
+from core.base import Base  # noqa: E402
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
