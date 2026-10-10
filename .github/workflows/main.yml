@@ -81,3 +81,55 @@ jobs:
 
       - name: Run tests
         run: uv run --no-sync pytest --cov --cov-fail-under=80
+
+  image:
+    name: Image
+    runs-on: ubuntu-latest
+
+    env:
+      COMPOSE: docker compose --project-directory . -f docker/production.yml
+      API: http://127.0.0.1:8080
+      SUPERUSER: admin@example.com
+      SUPERUSER_PASSWORD: change-this-password
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Write throwaway secrets
+        run: |
+          printf '%s\n' \
+            "POSTGRES_DB=shop" \
+            "POSTGRES_USER=shop" \
+            "POSTGRES_PASSWORD=shop" \
+            > .envs/.production/db.secrets.env
+          printf '%s\n' \
+            "SECRET_KEY=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef" \
+            "FIRST_SUPERUSER=$SUPERUSER" \
+            "FIRST_SUPERUSER_PASSWORD=$SUPERUSER_PASSWORD" \
+            "DATABASE_URI=postgresql+asyncpg://shop:shop@db:5432/shop" \
+            > .envs/.production/app.secrets.env
+
+      - name: Build and start the production stack
+        run: $COMPOSE up -d --build
+
+      - name: Wait for the API
+        run: |
+          for _ in $(seq 1 30); do
+            curl -fsS "$API/" && exit 0
+            sleep 2
+          done
+          exit 1
+
+      - name: Container does not run as root
+        run: test "$($COMPOSE exec -T web id -u)" != "0"
+
+      - name: Log in as the bootstrap superuser
+        run: |
+          curl -fsS -X POST "$API/api/v1/auth/token" \
+            -d "username=$SUPERUSER" -d "password=$SUPERUSER_PASSWORD" \
+            | grep -q '"access_token"'
+
+      - name: Show logs
+        if: failure()
+        run: $COMPOSE logs
