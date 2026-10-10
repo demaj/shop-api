@@ -2,7 +2,7 @@ from functools import lru_cache
 from typing import Annotated, Any
 
 from __about__ import __version__
-from pydantic import AnyUrl, BeforeValidator, EmailStr, SecretStr, field_validator
+from pydantic import AnyUrl, BeforeValidator, EmailStr, Field, SecretStr, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -33,6 +33,9 @@ class Settings(BaseSettings):
     BACKEND_CORS_ORIGINS: Annotated[list[AnyUrl] | str, BeforeValidator(parse_cors)] = []
 
     DATABASE_URI: str
+    DATABASE_CONNECT_TIMEOUT: float = Field(default=5, gt=0)
+    DATABASE_POOL_TIMEOUT: float = Field(default=5, gt=0)
+    DATABASE_COMMAND_TIMEOUT: float = Field(default=30, gt=0)
     SQL_ECHO: bool = False
 
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8
