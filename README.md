@@ -89,3 +89,5 @@ container never receives the application's `SECRET_KEY` or superuser password.
 - Celery
 - dbdiagram.io
 - Host Render
+- OAuth/OIDC and JWT-based authentication
+- OpenTelemetry
