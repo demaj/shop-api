@@ -37,7 +37,8 @@ def withheld(exc: Exception) -> Exception:
 
 
 def _route(scope: Scope) -> str:
-    return getattr(scope.get("route"), "path", "-")
+    effective = scope.get("fastapi", {}).get("effective_route_context")
+    return getattr(effective, "path", None) or getattr(scope.get("route"), "path", "-")
 
 
 def _level(code: ErrorCode, exc: Exception | None) -> int:

@@ -24,7 +24,7 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
             yield session
 
 
-SessionDep = Annotated[AsyncSession, Depends(get_db)]
+SessionDep = Annotated[AsyncSession, Depends(get_db, scope="function")]
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"{get_settings().API_V1_STR}/auth/token")
 

@@ -3,12 +3,11 @@ from typing import Annotated, Any
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Path, Query
-from sqlalchemy.ext.asyncio import AsyncSession
 
 import crud
 import models
 import schemas
-from core.dependencies import get_current_active_user, get_db
+from core.dependencies import SessionDep, get_current_active_user
 from core.errors import ApiError, ErrorCode
 from helpers.params import CategoryListParams
 from helpers.responses import CategoryListResponse
@@ -30,8 +29,8 @@ write_router = APIRouter(
     status_code=HTTPStatus.OK,
 )
 async def read_categories(
+    db: SessionDep,
     params: Annotated[CategoryListParams, Query()],
-    db: AsyncSession = Depends(get_db),
 ) -> dict[str, Any]:
     """
     Retrieve List of `Categories`.
@@ -52,8 +51,8 @@ async def read_categories(
     status_code=HTTPStatus.CREATED,
 )
 async def create_category(
+    db: SessionDep,
     category_in: schemas.CategoryCreate,
-    db: AsyncSession = Depends(get_db),
 ) -> models.Category:
     """
     Create a new `Category`.
@@ -68,9 +67,9 @@ async def create_category(
     status_code=HTTPStatus.OK,
 )
 async def update_category(
+    db: SessionDep,
     category_in: schemas.CategoryUpdate,
     category_id: UUID = Path(title="The ID of the `category` to update"),
-    db: AsyncSession = Depends(get_db),
 ) -> models.Category:
     """
     Update a `Category`.
@@ -92,8 +91,8 @@ async def update_category(
     status_code=HTTPStatus.OK,
 )
 async def read_category(
+    db: SessionDep,
     category_id: UUID = Path(title="The ID of the `category` to get"),
-    db: AsyncSession = Depends(get_db),
 ) -> models.Category:
     """
     Get `Category` by ID.
@@ -110,8 +109,8 @@ async def read_category(
     status_code=HTTPStatus.NO_CONTENT,
 )
 async def delete_category(
+    db: SessionDep,
     category_id: UUID = Path(title="The ID of the `category` to delete"),
-    db: AsyncSession = Depends(get_db),
 ) -> None:
     """
     Delete a `Category`.

@@ -3,12 +3,11 @@ from typing import Annotated, Any
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Path, Query
-from sqlalchemy.ext.asyncio import AsyncSession
 
 import crud
 import models
 import schemas
-from core.dependencies import get_current_active_user, get_db
+from core.dependencies import SessionDep, get_current_active_user
 from core.errors import ApiError, ErrorCode
 from helpers.params import ProductListParams
 from helpers.responses import ProductListResponse
@@ -30,8 +29,8 @@ write_router = APIRouter(
     status_code=HTTPStatus.OK,
 )
 async def read_products(
+    db: SessionDep,
     params: Annotated[ProductListParams, Query()],
-    db: AsyncSession = Depends(get_db),
 ) -> dict[str, Any]:
     """
     Retrieve List of `Products`.
@@ -52,8 +51,8 @@ async def read_products(
     status_code=HTTPStatus.CREATED,
 )
 async def create_product(
+    db: SessionDep,
     product_in: schemas.ProductCreate,
-    db: AsyncSession = Depends(get_db),
 ) -> models.Product:
     """
     Create a new `Product`.
@@ -68,10 +67,10 @@ async def create_product(
     status_code=HTTPStatus.OK,
 )
 async def update_product(
+    db: SessionDep,
     *,
     product_id: UUID = Path(title="The ID of the `Product` to update"),
     product_in: schemas.ProductUpdate,
-    db: AsyncSession = Depends(get_db),
 ) -> models.Product:
     """
     Update a `Product`.
@@ -93,8 +92,8 @@ async def update_product(
     status_code=HTTPStatus.OK,
 )
 async def read_product(
+    db: SessionDep,
     product_id: UUID = Path(title="The ID of the `Product` to get"),
-    db: AsyncSession = Depends(get_db),
 ) -> models.Product:
     """
     Get `Product` by ID.
@@ -111,8 +110,8 @@ async def read_product(
     status_code=HTTPStatus.NO_CONTENT,
 )
 async def delete_product(
+    db: SessionDep,
     product_id: UUID = Path(title="The ID of the `Product` to delete"),
-    db: AsyncSession = Depends(get_db),
 ) -> None:
     """
     Delete a `Product`.

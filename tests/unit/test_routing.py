@@ -1,7 +1,6 @@
 """Structural invariants: no unprotected writes, everything under /api/v1."""
 
 from fastapi import FastAPI
-from fastapi.dependencies.utils import get_flat_dependant
 from fastapi.routing import APIRoute
 
 WRITE_METHODS = {"POST", "PUT", "PATCH", "DELETE"}
@@ -14,12 +13,12 @@ def api_routes(app: FastAPI) -> list[APIRoute]:
 
 
 def test_every_write_route_requires_authentication(app: FastAPI) -> None:
-    unprotected = []
-    for route in api_routes(app):
-        if not (route.methods & WRITE_METHODS) or route.path in PUBLIC_WRITE_PATHS:
-            continue
-        if not get_flat_dependant(route.dependant).security_requirements:
-            unprotected.append(f"{sorted(route.methods)} {route.path}")
+    unprotected = [
+        f"{method.upper()} {path}"
+        for path, operations in app.openapi()["paths"].items()
+        for method, operation in operations.items()
+        if method.upper() in WRITE_METHODS and path not in PUBLIC_WRITE_PATHS and not operation.get("security")
+    ]
     assert not unprotected, f"Write routes without authentication: {unprotected}"
 
 

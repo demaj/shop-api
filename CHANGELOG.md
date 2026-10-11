@@ -52,6 +52,8 @@ History before this file was started (2021 to 2025) is available in the git log 
 - List endpoints return results in a deterministic order.
 - CORS origins are read from `BACKEND_CORS_ORIGINS`.
 - The data layer is rewritten on the SQLAlchemy 2.0 async API, with one transaction per request.
+- All dependencies upgraded to their current releases, including FastAPI 0.143 (Starlette 1.7),
+  SQLAlchemy 2.1, Pydantic 2.14 and PyJWT 2.15.
 - Dependencies are managed with uv (`pyproject.toml` and `uv.lock`); linting and formatting use ruff.
 - The Docker image is a multi-stage uv build that runs uvicorn workers as a non-root user.
 
@@ -71,6 +73,8 @@ History before this file was started (2021 to 2025) is available in the git log 
 
 ### Security
 
+- The upgrade moves past every advisory `pip-audit` reported against the previous PyJWT 2.13.0
+  and Starlette 0.40.0.
 - Logging in to an inactive account with the correct password returns the same `401` as a wrong
   password, instead of a `400` that confirmed the account and password were valid.
 - Database errors are logged without the driver's message, which could contain row data such as
