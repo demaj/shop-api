@@ -1,0 +1,32 @@
+name: Audit
+
+on:
+  schedule:
+    - cron: "17 5 * * *"
+  push:
+    branches: [main]
+    paths: [uv.lock, pyproject.toml, .github/workflows/audit.yml]
+  pull_request:
+    branches: [main]
+    paths: [uv.lock, pyproject.toml, .github/workflows/audit.yml]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  dependencies:
+    name: Dependencies
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+
+      - name: Export the locked dependencies
+        run: uv export --frozen --format requirements-txt --output-file requirements.txt
+
+      - name: Audit against known vulnerabilities
+        run: uvx pip-audit==2.10.1 --requirement requirements.txt --require-hashes --disable-pip
