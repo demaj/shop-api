@@ -2,6 +2,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
+PASSWORD_MAX_LENGTH = 128
+
 
 class UserBase(BaseModel):
     email: EmailStr
@@ -11,13 +13,13 @@ class UserBase(BaseModel):
 
 
 class UserCreate(UserBase):
-    password: str = Field(min_length=8, max_length=128)
+    password: str = Field(min_length=8, max_length=PASSWORD_MAX_LENGTH)
 
 
 class UserUpdate(BaseModel):
     email: EmailStr | None = None
     name: str | None = Field(default=None, max_length=255)
-    password: str | None = Field(default=None, min_length=8, max_length=128)
+    password: str | None = Field(default=None, min_length=8, max_length=PASSWORD_MAX_LENGTH)
     is_active: bool | None = None
     is_superuser: bool | None = None
 

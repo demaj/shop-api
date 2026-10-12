@@ -39,6 +39,7 @@ class Settings(BaseSettings):
     SQL_ECHO: bool = False
 
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8
+    PASSWORD_HASH_CONCURRENCY: int = Field(default=4, ge=1)
 
     FIRST_SUPERUSER: EmailStr
     FIRST_SUPERUSER_PASSWORD: SecretStr

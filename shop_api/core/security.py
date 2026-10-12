@@ -2,6 +2,7 @@ from datetime import UTC, datetime, timedelta
 from typing import Final
 from uuid import UUID
 
+import anyio
 import anyio.to_thread
 import jwt
 from pwdlib import PasswordHash
@@ -28,17 +29,20 @@ def verify_password_sync(password: str, hashed_password: str) -> bool:
         return False
 
 
+_hash_limiter: Final = anyio.CapacityLimiter(get_settings().PASSWORD_HASH_CONCURRENCY)
+
+
 async def hash_password(password: str) -> str:
     # Argon2 costs ~100ms CPU and 64MiB per call — never run it on the event loop.
-    return await anyio.to_thread.run_sync(hash_password_sync, password)
+    return await anyio.to_thread.run_sync(hash_password_sync, password, limiter=_hash_limiter)
 
 
 async def verify_password(password: str, hashed_password: str) -> bool:
-    return await anyio.to_thread.run_sync(verify_password_sync, password, hashed_password)
+    return await anyio.to_thread.run_sync(verify_password_sync, password, hashed_password, limiter=_hash_limiter)
 
 
 async def verify_dummy_password(password: str) -> None:
-    await anyio.to_thread.run_sync(verify_password_sync, password, _DUMMY_HASH)
+    await anyio.to_thread.run_sync(verify_password_sync, password, _DUMMY_HASH, limiter=_hash_limiter)
 
 
 def create_access_token(subject: str | UUID, expires_delta: timedelta | None = None) -> str:

@@ -10,6 +10,7 @@ from core.database import AsyncSessionLocal
 from core.errors import ApiError, ErrorCode
 from helpers.tags import Tags
 from schemas import Token
+from schemas.user import PASSWORD_MAX_LENGTH
 
 router = APIRouter(prefix="/auth", tags=[Tags.auth])
 
@@ -37,6 +38,8 @@ async def login_access_token(
         "Incorrect username or password",
         headers={"WWW-Authenticate": "Bearer"},
     )
+    if len(form_data.password) > PASSWORD_MAX_LENGTH:
+        raise unauthorized
     if user is None:
         # Same wall-clock cost as a real verification (anti user-enumeration).
         await security.verify_dummy_password(form_data.password)
