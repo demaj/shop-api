@@ -5,6 +5,22 @@
 name: shop-api-prod
 
 services:
+  proxy:
+    container_name: shop-proxy
+    image: haproxy:3.2
+    environment:
+      - TLS_DOMAIN
+      - LOGIN_FAILURE_LIMIT
+    ports:
+      - "${PROXY_HTTP_BIND:-127.0.0.1:8080}:8080"
+      - "${PROXY_HTTPS_BIND:-127.0.0.1:8443}:8443"
+    volumes:
+      - ./docker/haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+      - proxy_certs:/etc/haproxy/certs:ro
+    networks:
+      - postgres_network
+    restart: unless-stopped
+
   web:
     container_name: shop-web
     build:
@@ -13,8 +29,9 @@ services:
       target: runtime
     env_file:
       - ./.envs/.production/app.secrets.env
-    ports:
-      - "127.0.0.1:8080:8080"
+    environment:
+      FORWARDED_ALLOW_IPS: "*"
+    mem_limit: ${WEB_MEMORY_LIMIT:-1g}
     depends_on:
       db:
         condition: service_healthy
@@ -48,3 +65,4 @@ networks:
 
 volumes:
   postgres_data:
+  proxy_certs:

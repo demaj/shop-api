@@ -1,6 +1,19 @@
 name: shop-api
 
 services:
+  proxy:
+    container_name: shop-proxy
+    image: haproxy:3.2
+    environment:
+      LOGIN_FAILURE_LIMIT: ${LOGIN_FAILURE_LIMIT:-1000}
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./docker/haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+    networks:
+      - postgres_network
+    restart: unless-stopped
+
   web:
     container_name: shop-web
     build:
@@ -17,8 +30,10 @@ services:
       - ./pyproject.toml:/code/pyproject.toml
     env_file:
       - ./.envs/.local/app.secrets.env
+    environment:
+      FORWARDED_ALLOW_IPS: "*"
     ports:
-      - "8080:8080"
+      - "127.0.0.1:8081:8080"
     depends_on:
       db:
         condition: service_healthy

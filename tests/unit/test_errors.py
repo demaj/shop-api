@@ -18,7 +18,9 @@ def test_code_to_status_table_is_pinned() -> None:
         "already_exists": 409,
         "reference_not_found": 409,
         "resource_in_use": 409,
+        "payload_too_large": 413,
         "validation_failed": 422,
+        "rate_limited": 429,
         "internal_error": 500,
         "service_unavailable": 503,
     }

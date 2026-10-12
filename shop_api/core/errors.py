@@ -19,7 +19,9 @@ class ErrorCode(StrEnum):
     already_exists = "already_exists"
     reference_not_found = "reference_not_found"
     resource_in_use = "resource_in_use"
+    payload_too_large = "payload_too_large"
     validation_failed = "validation_failed"
+    rate_limited = "rate_limited"
     internal_error = "internal_error"
     service_unavailable = "service_unavailable"
 
@@ -36,7 +38,9 @@ STATUS: dict[ErrorCode, HTTPStatus] = {
     ErrorCode.already_exists: HTTPStatus.CONFLICT,
     ErrorCode.reference_not_found: HTTPStatus.CONFLICT,
     ErrorCode.resource_in_use: HTTPStatus.CONFLICT,
+    ErrorCode.payload_too_large: HTTPStatus.REQUEST_ENTITY_TOO_LARGE,
     ErrorCode.validation_failed: HTTPStatus.UNPROCESSABLE_ENTITY,
+    ErrorCode.rate_limited: HTTPStatus.TOO_MANY_REQUESTS,
     ErrorCode.internal_error: HTTPStatus.INTERNAL_SERVER_ERROR,
     ErrorCode.service_unavailable: HTTPStatus.SERVICE_UNAVAILABLE,
 }

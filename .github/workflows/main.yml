@@ -130,6 +130,30 @@ jobs:
             -d "username=$SUPERUSER" -d "password=$SUPERUSER_PASSWORD" \
             | grep -q '"access_token"'
 
+      - name: App is reachable only through the proxy
+        run: test -z "$($COMPOSE port web 8080 2>/dev/null)"
+
+      - name: Proxy adds security headers and a request id
+        run: |
+          headers=$(curl -fsS -D - -o /dev/null "$API/")
+          echo "$headers" | grep -qi '^x-content-type-options: nosniff'
+          echo "$headers" | grep -qi '^x-request-id: '
+
+      - name: Proxy rejects oversized bodies
+        run: |
+          status=$(head -c 2097152 /dev/zero | curl -s -o /dev/null -w '%{http_code}' \
+            -X POST "$API/api/v1/categories" -H "Content-Type: application/json" --data-binary @-)
+          test "$status" = 413
+
+      - name: Proxy limits failed logins
+        run: |
+          attempt() {
+            curl -s -o /dev/null -w '%{http_code}' -X POST "$API/api/v1/auth/token" \
+              -d "username=$SUPERUSER" -d "password=wrong"
+          }
+          for _ in 1 2 3 4 5; do test "$(attempt)" = 401; done
+          test "$(attempt)" = 429
+
       - name: Show logs
         if: failure()
         run: $COMPOSE logs

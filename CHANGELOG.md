@@ -22,6 +22,10 @@ History before this file was started (2021 to 2025) is available in the git log 
 - Every log line written while handling a request carries the request id.
 - Integration tests that run against PostgreSQL, alongside the database-free unit tests.
 - CI: a lint job and a test job with a PostgreSQL service and a model/migration drift check.
+- An HAProxy reverse proxy in front of the production stack. It rejects request bodies over 1 MiB
+  (`413`, code `payload_too_large`), adds security headers, assigns the request id, and answers
+  `503` in the API's error format while the application is down. TLS termination is prepared and
+  switched on with `TLS_DOMAIN`. See "Reverse proxy" in the README.
 - Database time limits, tunable through `DATABASE_CONNECT_TIMEOUT` (default 5 s),
   `DATABASE_POOL_TIMEOUT` (5 s) and `DATABASE_COMMAND_TIMEOUT` (30 s). Previously a connection
   attempt could hang for 60 s and a statement had no limit.
@@ -30,6 +34,11 @@ History before this file was started (2021 to 2025) is available in the git log 
 
 ### Changed
 
+- The production application container is no longer published to the host; the proxy listens on
+  the same default address, `127.0.0.1:8080`.
+- The development stack also runs behind the proxy on `localhost:8080`, with the failed-login
+  limit raised to 1000 (`LOGIN_FAILURE_LIMIT`). The application itself moved to
+  `127.0.0.1:8081` for direct access.
 - **Breaking:** all routes are served under `/api/v1`. Unprefixed paths no longer resolve.
 - **Breaking:** creating, updating and deleting categories and products requires authentication.
   Read endpoints stay public.
@@ -73,6 +82,12 @@ History before this file was started (2021 to 2025) is available in the git log 
 
 ### Security
 
+- Failed logins are rate limited: after 5 failures within a minute from one address, logins from
+  that address return `429` (code `rate_limited`) with `Retry-After: 60`.
+- Password hashing is limited to `PASSWORD_HASH_CONCURRENCY` (default 4) simultaneous operations
+  per worker, and the production `web` container has a memory limit (`WEB_MEMORY_LIMIT`, default
+  `1g`), so a burst of login attempts can no longer exhaust the host's memory.
+- A login with a password longer than 128 characters is rejected without being hashed.
 - The upgrade moves past every advisory `pip-audit` reported against the previous PyJWT 2.13.0
   and Starlette 0.40.0.
 - Logging in to an inactive account with the correct password returns the same `401` as a wrong
